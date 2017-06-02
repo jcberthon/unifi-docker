@@ -1,0 +1,1 @@
+JSVC_EXTRA_OPTS="-nodetach"

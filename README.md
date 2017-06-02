@@ -2,87 +2,103 @@
 
 ## Description
 
-This is a containerized version of [Ubiqiti Network](https://www.ubnt.com/)'s Unifi Controller version 5.
+This is a containerized version of [Ubiqiti Network](https://www.ubnt.com/)'s
+Unifi Controller version 5.
 
-Use `docker run --net=host -d jacobalberty/unifi:unifi5` to run it.
+Use `docker run --init --net=host -d docker.island.lan/infra/containers/unifi:unifi5`
+to run it using your host network stack (you might want to do better than that
+see below).
 
 The following options may be of use:
 
 - Set the timezone with `TZ`
 - Bind mount the `data` and `log` volumes
 
-Example to test with
+Example to test with (or simply use the docker-compose.yml file)
 
-```bash
-mkdir -p unifi/data
-mkdir -p unifi/logs
-docker run --rm --net=host -e TZ='Africa/Johannesburg' -v ~/unifi/data:/var/lib/unifi -v ~/unifi/logs:/var/log/unifi --name unifi jacobalberty/unifi:unifi5
+```shell_session
+$ mkdir -p ~/unifi/data
+$ mkdir -p ~/unifi/logs
+$ docker build -t unifi .
+$ docker run --rm --init --cap-drop ALL -p 8080:8080 -p 8443:8443 -p 8843:8843 -e TZ='Europe/Berlin' -v ~/unifi/data:/usr/lib/unifi/data -v ~/unifi/logs:/usr/lib/unifi/logs --name unifi unifi
+```
+
+In this example, we drop all privileges, activate port forwarding and it can run
+on a Docker host with user namespaces configured (so that the container does not
+run as root but as a simple user).  However, note that in this configuration you
+will need to follow the [Unifi Layer 3 methods for adoption and management]
+(https://help.ubnt.com/hc/en-us/articles/204909754-UniFi-Layer-3-methods-for-UAP-adoption-and-management).
+I have personnaly used the DNS and DHCP approach, both works fine.
+
+A similar example but with the easier L2 adoption (so we need to use the host
+network stack, and if you have user namespaces activated, you need to use the
+host user namespace, this means that the container run as root and has access
+to the network stack, this could be a security risk.  So make sure to drop as
+much privileges as possible).
+
+Note that I expect the following to work but I haven't tested it, simply replace
+the last line of the commands given above by:
+
+```shell_session
+$ docker run --rm --init --cap-drop ALL --net=host --userns=host  -e TZ='Europe/Berlin' -v ~/unifi/data:/usr/lib/unifi/data -v ~/unifi/logs:/usr/lib/unifi/logs --name unifi unifi
 ```
 
 ## Volumes:
 
-### `/var/lib/unifi`
-
-Configuration data
-
-### `/var/log/unifi`
-
-Log files
-
-### `/var/run/unifi`
-
-Run information
+- `/usr/lib/unifi/data`: Configuration data
+- `/usr/lib/unifi/logs`: Log files (not really needed)
 
 ## Environment Variables:
 
-### `TZ`
+- `TZ`: TimeZone. (i.e Europe/Berlin)
 
-TimeZone. (i.e America/Chicago)
+## Ports used by the Unifi Controller:
 
-## Expose:
+The ports which are not exposed by the container image are marked as such. When
+not specified, assume the port is exposed.
 
-### 8080/tcp - Device command/control
+- 3478/udp: STUN service (for NAT traversal - WebRTC, SIP, etc.)
+- 5656-5699/udp: Used for UPA-EDU (not exposed)
+- 6789/tcp: Speed Test (unifi5 only)
+- 8080/tcp: Device command/control (API)
+- 8443/tcp: Web interface + API
+- 8843/tcp: HTTPS portal (Guest WiFi?)
+- 8880/tcp: HTTP portal (Guest WiFi?)
+- 8881/tcp: do not use (reserved, not exposed)
+- 8882/tcp: do not use (reserved, not exposed)
+- 10001/udp: UBNT Discovery (not exposed)
+- 27017/tcp and 27117/tcp: Local-bound port for DB server (for MongoDB, not exposed)
+- 54123/udp: ???
 
-### 8443/tcp - Web interface + API
-
-### 8843/tcp - HTTPS portal
-
-### 8880/tcp - HTTP portal
-
-### 3478/udp - STUN service
-
-### 6789/tcp - Speed Test (unifi5 only)
-
-### 10001/udp - UBNT Discovery
+A container should at least redirect port 8443/tcp and port 8843/tcp (if usage of
+guest network is required).
 
 See [UniFi - Ports Used](https://help.ubnt.com/hc/en-us/articles/218506997-UniFi-Ports-Used)
 
-## Mulit-process container
+## Multi-process container
 
-While micro-service patterns try to avoid running multiple processes in a container, the unifi5 container tries to follow the same process execution model intended by the original debian package and it's init script, while trying to avoid needing to run a full init system.
+While micro-service patterns try to avoid running multiple processes in a
+container, the unifi5 container tries to follow the same process execution model
+intended by the original init script, while trying to avoid needing to run a full
+init system.
 
-Essentially, `dump-init` runs a simple shell wrapper script placed at `/usr/local/bin/unifi.sh`. `unifi.sh` executes and waits on the jsvc process which orchestrates running the controller as a service. The wrapper script also traps SIGTERM to issue the appropriate stop command to the unifi java `com.ubnt.ace.Launcher` process in the hopes that it helps keep the shutdown graceful.
+Essentially, it relies on the Docker `init` daemon (triggered using `--init`)
+which orchestrates running the controller as a service. AFAIU The init functino also
+traps SIGTERM to issue the appropriate stop command to the unifi processes in the
+hopes that it helps keep the shutdown graceful.
 
 Example seen within the container after it was started
 
-```bash
-$  docker exec -it ef081fcf6440 bash
-# ps -e -o pid,ppid,cmd | more
-  PID  PPID CMD
-    1     0 /usr/bin/dumb-init -- /usr/local/bin/unifi.sh
-    7     1 sh /usr/local/bin/unifi.sh
-    9     7 unifi -nodetach -home /usr/lib/jvm/java-8-openjdk-amd64 -classpath /usr/share/java/commons-daemon.jar:/usr/lib/unifi/lib/ace.jar -pidfile /var/run/unifi/unifi.pid -procname unifi -outfile /var/log/unifi/unifi.out.log -errfile /var/log/unifi/unifi.err.log -Dunifi.datadir=/var/lib/unifi -Dunifi.rundir=/var/run/unifi -Dunifi.logdir=/var/log/unifi -Djava.awt.headless=true -Dfile.encoding=UTF-8 -Xmx1024M -Xms32M com.ubnt.ace.Launcher start
-   10     9 unifi -nodetach -home /usr/lib/jvm/java-8-openjdk-amd64 -classpath /usr/share/java/commons-daemon.jar:/usr/lib/unifi/lib/ace.jar -pidfile /var/run/unifi/unifi.pid -procname unifi -outfile /var/log/unifi/unifi.out.log -errfile /var/log/unifi/unifi.err.log -Dunifi.datadir=/var/lib/unifi -Dunifi.rundir=/var/run/unifi -Dunifi.logdir=/var/log/unifi -Djava.awt.headless=true -Dfile.encoding=UTF-8 -Xmx1024M -Xms32M com.ubnt.ace.Launcher start
-   31    10 /usr/lib/jvm/java-8-openjdk-amd64/jre/bin/java -Xmx1024M -XX:ErrorFile=/usr/lib/unifi/data/logs/hs_err_pid<pid>.log -Dapple.awt.UIElement=true -jar /usr/lib/unifi/lib/ace.jar start
-   58    31 bin/mongod --dbpath /usr/lib/unifi/data/db --port 27117 --logappend --logpath logs/mongod.log --nohttpinterface --bind_ip 127.0.0.1
-  108     0 bash
-  116   108 ps -e -o pid,ppid,cmd
-  117   108 [bash]
+```shell_session
+$ docker exec -t 49b9e24a58f8 ps -e -o pid,ppid,cmd
+   PID   PPID CMD
+     1      0 /dev/init -- /usr/lib/unifi/bin/unifi.init start
+     6      1 /bin/bash /usr/lib/unifi/bin/unifi.init start
+    55      6 unifi -home /usr/lib/jvm/java-8-openjdk-amd64 -cp /usr/share/java/commons-daemon.jar:/usr/lib/unifi/lib/ace.jar -p
+    56     55 unifi -home /usr/lib/jvm/java-8-openjdk-amd64 -cp /usr/share/java/commons-daemon.jar:/usr/lib/unifi/lib/ace.jar -p
+    57     55 unifi -home /usr/lib/jvm/java-8-openjdk-amd64 -cp /usr/share/java/commons-daemon.jar:/usr/lib/unifi/lib/ace.jar -p
+    70     57 /usr/lib/jvm/java-8-openjdk-amd64/jre/bin/java -Xmx1024M -XX:ErrorFile=/usr/lib/unifi/data/logs/hs_err_pid<pid>.lo
+    89     70 bin/mongod --dbpath /usr/lib/unifi/data/db --port 27117 --logappend --logpath logs/mongod.log --nohttpinterface --
+   959      0 ps -e -o pid,ppid,cmd
 ```
 
-## TODO
-
-Future work?
-
-- Don't run as root (but Unifi's Debian package does by the way...)
-- Possibly use Debian image with systemd init included (but thus far, I don't know of an official Debian systemd image to base off)
