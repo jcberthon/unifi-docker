@@ -1,5 +1,18 @@
 # unifi-docker
 
+## Changelog
+
+The first change compare to original fork is that I use the Docker init and the Unifi Controller init
+script. So I could remove a lot of unecessary stuff.
+
+In addition, I use the Debian/Ubuntu APT repository from Unifi instead of downloading individual packages,
+this avoids changing the Dockerfile for each new release from Unifi. I simply need to rebuild my image.
+
+Finally the last change is about security, I'm dropping every possible privileges, I can user user namespaces
+so that the container processes do not run as root, I'm not binding the container to the host networking but
+using Docker default bridge network so that I can control which service I expose on my network, but it requires
+using L3 adoption (see below).
+
 ## Description
 
 This is a containerized version of [Ubiqiti Network](https://www.ubnt.com/)'s
