@@ -17,7 +17,7 @@ RUN apt-key adv  \
 # Install Ubiquiti UniFi Controller
 RUN echo "deb http://www.ubnt.com/downloads/unifi/debian stable ubiquiti" > /etc/apt/sources.list.d/ubiquiti-unifi.list && \
     apt-get update && \
-    apt-get install -y unifi && \
+    apt-get install -y curl unifi && \
     mkdir -p /usr/lib/unifi/run && \
     apt-get clean -qy && \
     rm -rf /var/lib/apt/lists/*
