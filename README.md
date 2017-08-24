@@ -21,11 +21,11 @@ healthy, etc.) and can be used by others (e.g. Swarm) for better orchestration.
 Example:
 ```console
 $ docker ps
-CONTAINER ID        IMAGE                                 COMMAND                  CREATED             STATUS                             NAMES
-7bb52a751107        jcberthon/unifi-docker/unifi:latest   "/usr/lib/unifi/bi..."   44 seconds ago      Up 43 seconds (health: starting)   unifi
+CONTAINER ID        IMAGE                                 CREATED             STATUS                             NAMES
+7bb52a751107        jcberthon/unifi-docker/unifi:latest   44 seconds ago      Up 43 seconds (health: starting)   unifi
 $ docker ps
-CONTAINER ID        IMAGE                                 COMMAND                  CREATED             STATUS                   NAMES
-7bb52a751107        jcberthon/unifi-docker/unifi:latest   "/usr/lib/unifi/bi..."   3 minutes ago       Up 3 minutes (healthy)   unifi
+CONTAINER ID        IMAGE                                 CREATED             STATUS                   NAMES
+7bb52a751107        jcberthon/unifi-docker/unifi:latest   3 minutes ago       Up 3 minutes (healthy)   unifi
 ```
 
 ## Description
