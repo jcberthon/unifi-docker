@@ -5,8 +5,8 @@
 The first change compare to original fork is that I use the Docker init and the Unifi Controller init
 script. So I could remove a lot of unecessary stuff.
 
-In addition, I use the Debian/Ubuntu APT repository from Unifi instead of downloading individual packages,
-this avoids changing the Dockerfile for each new release from Unifi. I simply need to rebuild my image.
+In addition, I use the [Debian/Ubuntu APT repository from Unifi](https://help.ubnt.com/hc/en-us/articles/220066768-UniFi-How-to-Install-Update-via-APT-on-Debian-or-Ubuntu) instead of downloading individual packages,
+this avoids changing the Dockerfile for each new release from Unifi. I simply need to rebuild my image. In addition, Ubiquiti is using "rolling updates" so that by using the "stable" branch you get always the latest stable release (was 5.4.x when I started, is now 5.5.x at time of edition)
 
 Finally the last change is about security, I'm dropping every possible privileges, I can user user namespaces
 so that the container processes do not run as root, I'm not binding the container to the host networking but
@@ -15,10 +15,10 @@ using L3 adoption (see below).
 
 ## Description
 
-This is a containerized version of [Ubiqiti Network](https://www.ubnt.com/)'s
+This is a containerized version of [Ubiquiti Network](https://www.ubnt.com/)'s
 Unifi Controller version 5.
 
-Use `docker run --init --net=host -d docker.island.lan/infra/containers/unifi:unifi5`
+Use `docker run --init --net=host -d jcberthon/unifi-docker/unifi`
 to run it using your host network stack (you might want to do better than that
 see below).
 
@@ -32,8 +32,8 @@ Example to test with (or simply use the docker-compose.yml file)
 ```shell_session
 $ mkdir -p ~/unifi/data
 $ mkdir -p ~/unifi/logs
-$ docker build -t unifi .
-$ docker run --rm --init --cap-drop ALL -p 8080:8080 -p 8443:8443 -p 8843:8843 -e TZ='Europe/Berlin' -v ~/unifi/data:/usr/lib/unifi/data -v ~/unifi/logs:/usr/lib/unifi/logs --name unifi unifi
+$ docker build -t jcberthon/unifi-docker/unifi .
+$ docker run --rm --init --cap-drop ALL -p 8080:8080 -p 8443:8443 -p 8843:8843 -e TZ='Europe/Berlin' -v ~/unifi/data:/usr/lib/unifi/data -v ~/unifi/logs:/usr/lib/unifi/logs --name unifi jcberthon/unifi-docker/unifi
 ```
 
 In this example, we drop all privileges, activate port forwarding and it can run
@@ -53,7 +53,7 @@ Note that I expect the following to work but I haven't tested it, simply replace
 the last line of the commands given above by:
 
 ```shell_session
-$ docker run --rm --init --cap-drop ALL --net=host --userns=host  -e TZ='Europe/Berlin' -v ~/unifi/data:/usr/lib/unifi/data -v ~/unifi/logs:/usr/lib/unifi/logs --name unifi unifi
+$ docker run --rm --init --cap-drop ALL --net=host --userns=host  -e TZ='Europe/Berlin' -v ~/unifi/data:/usr/lib/unifi/data -v ~/unifi/logs:/usr/lib/unifi/logs --name unifi jcberthon/unifi-docker/unifi
 ```
 
 ## Volumes:
