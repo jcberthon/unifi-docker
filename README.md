@@ -19,13 +19,14 @@ provides a neat visualisation when querying the container for its state (startin
 healthy, etc.) and can be used by others (e.g. Swarm) for better orchestration.
 
 Example:
+```console
 $ docker ps
 CONTAINER ID        IMAGE                                 COMMAND                  CREATED             STATUS                             NAMES
 7bb52a751107        jcberthon/unifi-docker/unifi:latest   "/usr/lib/unifi/bi..."   44 seconds ago      Up 43 seconds (health: starting)   unifi
 $ docker ps
 CONTAINER ID        IMAGE                                 COMMAND                  CREATED             STATUS                   NAMES
 7bb52a751107        jcberthon/unifi-docker/unifi:latest   "/usr/lib/unifi/bi..."   3 minutes ago       Up 3 minutes (healthy)   unifi
-
+```
 
 ## Description
 
@@ -43,7 +44,7 @@ The following options may be of use:
 
 Example to test with (or simply use the docker-compose.yml file)
 
-```shell_session
+```console
 $ mkdir -p ~/unifi/data
 $ mkdir -p ~/unifi/logs
 $ docker build -t jcberthon/unifi-docker/unifi .
@@ -66,7 +67,7 @@ much privileges as possible).
 Note that I expect the following to work but I haven't tested it, simply replace
 the last line of the commands given above by:
 
-```shell_session
+```console
 $ docker run --rm --init --cap-drop ALL --net=host --userns=host  -e TZ='Europe/Berlin' -v ~/unifi/data:/var/lib/unifi -v ~/unifi/logs:/var/log/unifi --name unifi jcberthon/unifi-docker/unifi
 ```
 
@@ -116,7 +117,7 @@ hopes that it helps keep the shutdown graceful.
 
 Example seen within the container after it was started
 
-```shell_session
+```console
 $ docker exec -t 49b9e24a58f8 ps -e -o pid,ppid,cmd
    PID   PPID CMD
      1      0 /dev/init -- /usr/lib/unifi/bin/unifi.init start
@@ -139,12 +140,12 @@ controller (especially if you try to change the data and log folders, but do not
 of the container).
 
 The possible parameters can be (they are described in the unifi.default file in much details):
-* UNIFI_DATA_DIR: data folder for Unifi Controller, change with caution
-* UNIFI_LOG_DIR: log folder for Unifi Controller, change with caution
-* UNIFI_RUN_DIR: runtime folder for Unifi Controller
-* JAVA_ENTROPY_GATHER_DEVICE: advanced parameter, most people should not require it
-* JVM_MAX_HEAP_SIZE: limit the JVM maximum heap size (for home and SOHO, 512M or 1024M is a good value)
-* JVM_INIT_HEAP_SIZE: minimum JVM heap size (on startup), usually not needed
-* UNIFI_JVM_EXTRA_OPTS: additional JVM parameters can be added here
-* ENABLE_UNIFI: boolean ('yes' or 'no') leave it to 'yes' or unset, as you want the Unifi Controller to run
-* JSVC_EXTRA_OPTS: jsvc(the Java as a service command), this option should contain at least "-nodetach"
+* `UNIFI_DATA_DIR`: data folder for Unifi Controller, change with caution
+* `UNIFI_LOG_DIR`: log folder for Unifi Controller, change with caution
+* `UNIFI_RUN_DIR`: runtime folder for Unifi Controller
+* `JAVA_ENTROPY_GATHER_DEVICE`: advanced parameter, most people should not require it
+* `JVM_MAX_HEAP_SIZE`: limit the JVM maximum heap size (for home and SOHO, 512M or 1024M is a good value)
+* `JVM_INIT_HEAP_SIZE`: minimum JVM heap size (on startup), usually not needed
+* `UNIFI_JVM_EXTRA_OPTS`: additional JVM parameters can be added here
+* `ENABLE_UNIFI`: boolean ('yes' or 'no') leave it to 'yes' or unset, as you want the Unifi Controller to run
+* `JSVC_EXTRA_OPTS`: jsvc(the Java as a service command), this option should contain at least "-nodetach"
