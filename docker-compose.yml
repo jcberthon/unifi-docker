@@ -5,7 +5,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: "${CI_REGISTRY_IMAGE:jcberthon/unifi}:${IMAGE_TAG:-latest}"
+    image: "${CI_REGISTRY_IMAGE:-jcberthon/unifi-docker/unifi}:${IMAGE_TAG:-latest}"
     restart: always
     hostname: 'unifi'
     container_name: unifi
@@ -29,4 +29,3 @@ volumes:
     driver: local
   unifi_logs:
     driver: local
-
