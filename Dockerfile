@@ -23,7 +23,7 @@ RUN echo "deb http://www.ubnt.com/downloads/unifi/debian stable ubiquiti" > /etc
     rm -rf /var/lib/apt/lists/*
 
 
-VOLUME ['/usr/lib/unifi/data', '/usr/lib/unifi/logs']
+VOLUME ['/var/lib/unifi', 'var/log/unifi']
 
 #EXPOSE 6789/tcp 8080/tcp 8081/tcp 8443/tcp 8843/tcp 8880/tcp 3478/udp
 EXPOSE 6789/tcp 8080/tcp 8443/tcp 8880/tcp 8843/tcp 3478/udp

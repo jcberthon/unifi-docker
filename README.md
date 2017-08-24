@@ -33,7 +33,7 @@ Example to test with (or simply use the docker-compose.yml file)
 $ mkdir -p ~/unifi/data
 $ mkdir -p ~/unifi/logs
 $ docker build -t jcberthon/unifi-docker/unifi .
-$ docker run --rm --init --cap-drop ALL -p 8080:8080 -p 8443:8443 -p 8843:8843 -e TZ='Europe/Berlin' -v ~/unifi/data:/usr/lib/unifi/data -v ~/unifi/logs:/usr/lib/unifi/logs --name unifi jcberthon/unifi-docker/unifi
+$ docker run --rm --init --cap-drop ALL -p 8080:8080 -p 8443:8443 -p 8843:8843 -e TZ='Europe/Berlin' -v ~/unifi/data:/var/lib/unifi -v ~/unifi/logs:/var/log/unifi --name unifi jcberthon/unifi-docker/unifi
 ```
 
 In this example, we drop all privileges, activate port forwarding and it can run
@@ -58,8 +58,8 @@ $ docker run --rm --init --cap-drop ALL --net=host --userns=host  -e TZ='Europe/
 
 ## Volumes:
 
-- `/usr/lib/unifi/data`: Configuration data
-- `/usr/lib/unifi/logs`: Log files (not really needed)
+- `/var/lib/unifi`: Configuration data
+- `/var/log/unifi`: Log files (not really needed)
 
 ## Environment Variables:
 
@@ -114,4 +114,24 @@ $ docker exec -t 49b9e24a58f8 ps -e -o pid,ppid,cmd
     89     70 bin/mongod --dbpath /usr/lib/unifi/data/db --port 27117 --logappend --logpath logs/mongod.log --nohttpinterface --
    959      0 ps -e -o pid,ppid,cmd
 ```
+
+## Advanced options/configurations
+
+Before building your container, you can tweak the file unifi.default.
+
+This files contains several parameters which can override the default configuration. The file contains
+descriptions of those parameters. But you should be aware that by changing them you could break the
+controller (especially if you try to change the data and log folders, but do not change the volumes
+of the container).
+
+The possible parameters can be (they are described in the unifi.default file in much details):
+* UNIFI_DATA_DIR: data folder for Unifi Controller, change with caution
+* UNIFI_LOG_DIR: log folder for Unifi Controller, change with caution
+* UNIFI_RUN_DIR: runtime folder for Unifi Controller
+* JAVA_ENTROPY_GATHER_DEVICE: advanced parameter, most people should not require it
+* JVM_MAX_HEAP_SIZE: limit the JVM maximum heap size (for home and SOHO, 512M or 1024M is a good value)
+* JVM_INIT_HEAP_SIZE: minimum JVM heap size (on startup), usually not needed
+* UNIFI_JVM_EXTRA_OPTS: additional JVM parameters can be added here
+* ENABLE_UNIFI: boolean ('yes' or 'no') leave it to 'yes' or unset, as you want the Unifi Controller to run
+* JSVC_EXTRA_OPTS: jsvc(the Java as a service command), this option should contain at least "-nodetach"
 

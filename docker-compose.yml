@@ -1,18 +1,19 @@
-version: '2.1'
+version: '2.2'
 
 services:
   unifi:
+    build:
+      context: .
+      dockerfile: Dockerfile
     image: "${CI_REGISTRY_IMAGE:jcberthon/unifi}:${IMAGE_TAG:-latest}"
     restart: always
     hostname: 'unifi'
     container_name: unifi
     mem_limit: 1024m
-    memswap_limit: 2048m
+    memswap_limit: 1536m
     init: true
     cap_drop:
       - ALL
-#    network_mode: "host"
-#    userns_mode: "host"
     ports:
       - '6789:6789'
       - '8080:8080'
@@ -20,6 +21,12 @@ services:
       - '8843:8843'
       - '10001:10001/udp'
     volumes:
-      - '/docker/unifi/data:/usr/lib/unifi/data'
-      - '/docker/unifi/log:/usr/lib/unifi/logs'
+      - unifi_data:/var/lib/unifi
+      - unifi_logs:/var/logs/unifi
+
+volumes:
+  unifi_data:
+    driver: local
+  unifi_logs:
+    driver: local
 
