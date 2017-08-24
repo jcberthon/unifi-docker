@@ -13,6 +13,20 @@ so that the container processes do not run as root, I'm not binding the containe
 using Docker default bridge network so that I can control which service I expose on my network, but it requires
 using L3 adoption (see below).
 
+A small extra touch, I've added a `HEALTHCHECK` directive in the `Dockerfile`, it
+will require you to build the container image with at least Docker 1.12. But it
+provides a neat visualisation when querying the container for its state (starting,
+healthy, etc.) and can be used by others (e.g. Swarm) for better orchestration.
+
+Example:
+$ docker ps
+CONTAINER ID        IMAGE                                 COMMAND                  CREATED             STATUS                             NAMES
+7bb52a751107        jcberthon/unifi-docker/unifi:latest   "/usr/lib/unifi/bi..."   44 seconds ago      Up 43 seconds (health: starting)   unifi
+$ docker ps
+CONTAINER ID        IMAGE                                 COMMAND                  CREATED             STATUS                   NAMES
+7bb52a751107        jcberthon/unifi-docker/unifi:latest   "/usr/lib/unifi/bi..."   3 minutes ago       Up 3 minutes (healthy)   unifi
+
+
 ## Description
 
 This is a containerized version of [Ubiquiti Network](https://www.ubnt.com/)'s
