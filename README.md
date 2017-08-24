@@ -53,7 +53,7 @@ Note that I expect the following to work but I haven't tested it, simply replace
 the last line of the commands given above by:
 
 ```shell_session
-$ docker run --rm --init --cap-drop ALL --net=host --userns=host  -e TZ='Europe/Berlin' -v ~/unifi/data:/usr/lib/unifi/data -v ~/unifi/logs:/usr/lib/unifi/logs --name unifi jcberthon/unifi-docker/unifi
+$ docker run --rm --init --cap-drop ALL --net=host --userns=host  -e TZ='Europe/Berlin' -v ~/unifi/data:/var/lib/unifi -v ~/unifi/logs:/var/log/unifi --name unifi jcberthon/unifi-docker/unifi
 ```
 
 ## Volumes:
@@ -134,4 +134,3 @@ The possible parameters can be (they are described in the unifi.default file in 
 * UNIFI_JVM_EXTRA_OPTS: additional JVM parameters can be added here
 * ENABLE_UNIFI: boolean ('yes' or 'no') leave it to 'yes' or unset, as you want the Unifi Controller to run
 * JSVC_EXTRA_OPTS: jsvc(the Java as a service command), this option should contain at least "-nodetach"
-

@@ -30,7 +30,10 @@ EXPOSE 6789/tcp 8080/tcp 8443/tcp 8880/tcp 8843/tcp 3478/udp
 
 COPY unifi.default /etc/default/unifi
 
+# Add healthcheck (requires Docker 1.12)
+HEALTHCHECK --interval=5m --timeout=3s --start-period=1m \
+  CMD curl --insecure -f https://localhost:8443/ || exit 1
+
 # execute the controller by using the init script and the `init` option of Docker
 ENTRYPOINT ["/usr/lib/unifi/bin/unifi.init"]
 CMD ["start"]
-
