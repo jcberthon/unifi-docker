@@ -2,6 +2,8 @@
 
 ## Changelog
 
+This work was based on the original project https://github.com/jacobalberty/unifi-docker. However, there is little left of the original project and not really chances of merging. So I've decided to cut the link between the parent project and this one. Anyway, thank you @jacobalberty for getting me kick started on this.
+
 The first change compare to original fork is that I use the Docker init and the Unifi Controller init
 script. So I could remove a lot of unecessary stuff.
 
