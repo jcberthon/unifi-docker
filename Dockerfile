@@ -1,11 +1,10 @@
 FROM ubuntu:16.04
 
-ENV DEBIAN_FRONTEND noninteractive \
-  container=docker
+ARG DEBIAN_FRONTEND=noninteractive
 
 # Making sure we have the latest update of all packages
 RUN apt-get update && \
-    apt-get upgrade -y && \
+    apt-get full-upgrade -y && \
     apt-get clean -qy && \
     rm -rf /var/lib/apt/lists/*
 
@@ -18,17 +17,28 @@ RUN apt-key adv  \
 RUN echo "deb http://www.ubnt.com/downloads/unifi/debian stable ubiquiti" > /etc/apt/sources.list.d/ubiquiti-unifi.list && \
     apt-get update && \
     apt-get install -y curl unifi && \
-    mkdir -p /usr/lib/unifi/run && \
     apt-get clean -qy && \
-    rm -rf /var/lib/apt/lists/*
+    rm -rf /var/lib/apt/lists/* && \
+    chgrp -R mongodb /usr/lib/unifi && \
+    rm -Rf /usr/lib/unifi/dl/*
 
+VOLUME ["/var/lib/unifi", "var/log/unifi"]
 
-VOLUME ['/var/lib/unifi', 'var/log/unifi']
-
-#EXPOSE 6789/tcp 8080/tcp 8081/tcp 8443/tcp 8843/tcp 8880/tcp 3478/udp
-EXPOSE 6789/tcp 8080/tcp 8443/tcp 8880/tcp 8843/tcp 3478/udp
+EXPOSE 6789/tcp 8080/tcp 8443/tcp 8880/tcp 8843/tcp 3478/udp 10001/udp
 
 COPY unifi.default /etc/default/unifi
+
+# Enable running Unifi Controller as a standard user
+# It requires that we create certain folders and links first
+# with the right user ownership and permissions.
+RUN mkdir -p -m 755 /var/lib/unifi /var/log/unifi /var/run/unifi && \
+    ln -s /var/lib/unifi /usr/lib/unifi/data && \
+    ln -s /var/log/unifi /usr/lib/unifi/logs && \
+    ln -s /var/run/unifi /usr/lib/unifi/run && \
+    chown mongodb:mongodb /var/lib/unifi /var/log/unifi /var/run/unifi && \
+    chmod g+sw /usr/lib/unifi && \
+    chmod -R g+w /usr/lib/unifi/dl
+USER mongodb
 
 # Add healthcheck (requires Docker 1.12)
 HEALTHCHECK --interval=2m --timeout=3s \
