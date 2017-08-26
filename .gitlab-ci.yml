@@ -1,0 +1,46 @@
+image: docker:latest
+
+# When using dind, it's wise to use the overlayfs driver for
+# improved performance.
+variables:
+  DOCKER_DRIVER: overlay
+
+services:
+- docker:dind
+
+before_script:
+  - apk add --no-cache curl gzip
+  - uname -a
+  - docker version
+
+build:stable:
+  only:
+    - master
+  before_script:
+    - export VERSION_STABLE="$(./ci-get-unifi-version.sh stable)"
+    - docker login -u "gitlab-ci-token" -p "$CI_JOB_TOKEN" $CI_REGISTRY
+  script:
+    - docker build -t "${CI_REGISTRY_IMAGE}/unifi:stable" .
+    - docker tag  "${CI_REGISTRY_IMAGE}/unifi:stable" "${CI_REGISTRY_IMAGE}/unifi:latest"
+    - docker tag  "${CI_REGISTRY_IMAGE}/unifi:stable" "${CI_REGISTRY_IMAGE}/unifi:${VERSION_STABLE}"
+    - docker push "${CI_REGISTRY_IMAGE}/unifi:stable"
+    - docker push "${CI_REGISTRY_IMAGE}/unifi:latest"
+    - docker push "${CI_REGISTRY_IMAGE}/unifi:${VERSION_STABLE}"
+    - docker rmi "${CI_REGISTRY_IMAGE}/unifi:stable" "${CI_REGISTRY_IMAGE}/unifi:${VERSION_STABLE}" "${CI_REGISTRY_IMAGE}/unifi:latest"
+  tags:
+    - docker
+
+build:oldstable:
+  only:
+    - oldstable
+  before_script:
+    - export VERSION_OLDSTABLE="$(./ci-get-unifi-version.sh oldstable)"
+    - docker login -u "gitlab-ci-token" -p "$CI_JOB_TOKEN" $CI_REGISTRY
+  script:
+    - docker build -t "${CI_REGISTRY_IMAGE}/unifi:oldstable" .
+    - docker tag  "${CI_REGISTRY_IMAGE}/unifi:oldstable" "${CI_REGISTRY_IMAGE}/unifi:${VERSION_OLDSTABLE}"
+    - docker push "${CI_REGISTRY_IMAGE}/unifi:oldstable"
+    - docker push "${CI_REGISTRY_IMAGE}/unifi:${VERSION_OLDSTABLE}"
+    - docker rmi "${CI_REGISTRY_IMAGE}/unifi:oldstable" "${CI_REGISTRY_IMAGE}/unifi:${VERSION_OLDSTABLE}"
+  tags:
+    - docker
