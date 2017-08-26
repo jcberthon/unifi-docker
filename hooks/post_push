@@ -1,0 +1,23 @@
+#!/bin/bash
+
+set -eu
+
+function tag_branch {
+  docker tag "${IMAGE_NAME}" "${DOCKER_REPO}:$1"
+  docker push "${DOCKER_REPO}:$1"
+}
+
+if [[ "${SOURCE_BRANCH}" == "master" ]]; then
+  CHANNEL_NAME="stable"
+  CHANNEL_VERSION="$(curl -sSL "http://www.ubnt.com/downloads/unifi/debian/dists/${CHANNEL_NAME}/ubiquiti/binary-armhf/Packages.gz" \
+    | zgrep Version | sed -rn 's/Version: ([[:digit:]].[[:digit:]].[[:digit:]]+)-.*/\1/p')"
+
+  tag_branch "latest"
+  tag_branch "${CHANNEL_VERSION}"
+elif [[ "${SOURCE_BRANCH}" == "oldstable" ]]; then
+  CHANNEL_NAME="oldstable"
+  CHANNEL_VERSION="$(curl -sSL "http://www.ubnt.com/downloads/unifi/debian/dists/${CHANNEL_NAME}/ubiquiti/binary-armhf/Packages.gz" \
+    | zgrep Version | sed -rn 's/Version: ([[:digit:]].[[:digit:]].[[:digit:]]+)-.*/\1/p')"
+
+  tag_branch "${CHANNEL_VERSION}"
+fi
