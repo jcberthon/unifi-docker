@@ -13,12 +13,10 @@ function tag_branch {
 # - `SOURCE_COMMIT`: the SHA1 hash of the commit being tested.
 # - `COMMIT_MSG`: the message from the commit being tested and built.
 # - `DOCKER_REPO`: the name of the Docker repository being built.
-# - `CACHE_TAG`: the Docker repository tag being built. --> seems empty, renamed?
+# - `CACHE_TAG`: the Docker repository tag being built. --> seems empty, renamed? it is still DOCKER_TAG, eventhough https://github.com/docker/docker.github.io/issues/2125
 # - `IMAGE_NAME`: the name and tag of the Docker repository being built. (This variable is a combination of `DOCKER_REPO`:`CACHE_TAG`.)
 #
 # SHA_COMMIT=${SOURCE_COMMIT:0:8}
-
-export
 
 if [[ "${SOURCE_BRANCH}" == "master" ]]; then
   CHANNEL_NAME="stable"
