@@ -6,12 +6,19 @@ container with the following principles:
 - Update often, we want security fixes to be includes asap
 - Rolling update of the stable Unifi Controller releases
 
-This project container image can be pulled from [Docker Hub](https://hub.docker.com/r/jcberthon/unifi/)
-or from [GitLab Registry (soon)](https://gitlab.com/huygens/unifi-docker/container_registry).
+This project container image can be pulled from:
+* [Docker Hub](https://hub.docker.com/r/jcberthon/unifi/): e.g. `docker pull jcberthon/unifi:stable`
+* [GitLab Registry](https://gitlab.com/huygens/unifi-docker/container_registry): e.g. `docker pull registry.gitlab.com/huygens/unifi-docker/unifi:stable`
 
 ## Supported tags and respective `Dockerfile` links
+On **Docker Hub**:
 * [`latest`, `stable` (Dockerfile)](https://github.com/jcberthon/unifi-docker/blob/master/Dockerfile): currently unifi-5.5 branch
 * [`oldstable` (Dockerfile)](https://github.com/jcberthon/unifi-docker/blob/oldstable/Dockerfile): currently unifi-5.4 branch
+
+On **GitLab Container Registry**:
+* [`latest`, `stable` (Dockerfile)](https://gitlab.com/huygens/unifi-docker/blob/master/Dockerfile): currently unifi-5.5 branch
+* [`oldstable` (Dockerfile)](https://gitlab.com/huygens/unifi-docker/blob/oldstable/Dockerfile): currently unifi-5.4 branch
+* And you will find specific versions (as they build), e.g. `5.5.20` or `5.4.19` or etc.
 
 ## Description
 
