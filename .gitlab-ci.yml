@@ -8,15 +8,14 @@ variables:
 services:
 - docker:dind
 
-before_script:
-  - apk add --no-cache curl gzip
-  - uname -a
-  - docker version
 
 build:stable:
   only:
     - master
   before_script:
+    - apk add --no-cache curl gzip
+    - uname -a
+    - docker version
     - export VERSION_STABLE="$(./ci-get-unifi-version.sh stable)"
     - docker login -u "gitlab-ci-token" -p "$CI_JOB_TOKEN" $CI_REGISTRY
   script:
@@ -34,6 +33,7 @@ build:oldstable:
   only:
     - oldstable
   before_script:
+    - apk add --no-cache curl gzip
     - export VERSION_OLDSTABLE="$(./ci-get-unifi-version.sh oldstable)"
     - docker login -u "gitlab-ci-token" -p "$CI_JOB_TOKEN" $CI_REGISTRY
   script:
