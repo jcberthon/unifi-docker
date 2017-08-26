@@ -1,4 +1,4 @@
-image: docker:dind
+image: docker:stable
 
 stages:
   - build
@@ -70,4 +70,3 @@ deploy_example:
     - docker
     - deploy
     - huygens
-
