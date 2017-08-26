@@ -14,6 +14,7 @@ This project container image can be pulled from:
 On **Docker Hub**:
 * [`latest`, `stable` (Dockerfile)](https://github.com/jcberthon/unifi-docker/blob/master/Dockerfile): currently unifi-5.5 branch
 * [`oldstable` (Dockerfile)](https://github.com/jcberthon/unifi-docker/blob/oldstable/Dockerfile): currently unifi-5.4 branch
+* And you will find specific versions (as they build), e.g. `5.5.20` or `5.4.19` or etc.
 
 On **GitLab Container Registry**:
 * [`latest`, `stable` (Dockerfile)](https://gitlab.com/huygens/unifi-docker/blob/master/Dockerfile): currently unifi-5.5 branch
