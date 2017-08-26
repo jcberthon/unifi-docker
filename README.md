@@ -10,7 +10,8 @@ This project container image can be pulled from [Docker Hub](https://hub.docker.
 or from [GitLab Registry (soon)](https://gitlab.com/huygens/unifi-docker/container_registry).
 
 ## Supported tags and respective `Dockerfile` links
-* [`latest` (Dockerfile)](Dockerfile)
+* [`latest`, `stable` (Dockerfile)](https://github.com/jcberthon/unifi-docker/blob/master/Dockerfile): currently unifi-5.5 branch
+* [`oldstable` (Dockerfile)](https://github.com/jcberthon/unifi-docker/blob/oldstable/Dockerfile): currently unifi-5.4 branch
 
 ## Description
 
