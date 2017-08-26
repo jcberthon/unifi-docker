@@ -13,19 +13,20 @@ function tag_branch {
 # - `SOURCE_COMMIT`: the SHA1 hash of the commit being tested.
 # - `COMMIT_MSG`: the message from the commit being tested and built.
 # - `DOCKER_REPO`: the name of the Docker repository being built.
-# - `CACHE_TAG`: the Docker repository tag being built.
+# - `CACHE_TAG`: the Docker repository tag being built. --> seems empty, renamed? it is still DOCKER_TAG, eventhough https://github.com/docker/docker.github.io/issues/2125
 # - `IMAGE_NAME`: the name and tag of the Docker repository being built. (This variable is a combination of `DOCKER_REPO`:`CACHE_TAG`.)
 #
 # SHA_COMMIT=${SOURCE_COMMIT:0:8}
 
-if [[ "${CACHE_TAG}" == "stable" ]]; then
-  CHANNEL_VERSION="$(curl -sSL "http://www.ubnt.com/downloads/unifi/debian/dists/${CACHE_TAG}/ubiquiti/binary-armhf/Packages.gz" \
+if [[ "${SOURCE_BRANCH}" == "master" ]]; then
+  CHANNEL_NAME="stable"
+  CHANNEL_VERSION="$(curl -sSL "http://www.ubnt.com/downloads/unifi/debian/dists/${CHANNEL_NAME}/ubiquiti/binary-armhf/Packages.gz" \
     | zgrep Version | sed -rn 's/Version: ([[:digit:]].[[:digit:]].[[:digit:]]+)-.*/\1/p')"
 
   tag_branch "latest"
   tag_branch "${CHANNEL_VERSION}"
-elif [[ "${CACHE_TAG}" == "oldstable" ]]; then
-  CHANNEL_VERSION="$(curl -sSL "http://www.ubnt.com/downloads/unifi/debian/dists/${CACHE_TAG}/ubiquiti/binary-armhf/Packages.gz" \
+elif [[ "${SOURCE_BRANCH}" == "oldstable" ]]; then
+  CHANNEL_VERSION="$(curl -sSL "http://www.ubnt.com/downloads/unifi/debian/dists/${SOURCE_BRANCH}/ubiquiti/binary-armhf/Packages.gz" \
     | zgrep Version | sed -rn 's/Version: ([[:digit:]].[[:digit:]].[[:digit:]]+)-.*/\1/p')"
 
   tag_branch "${CHANNEL_VERSION}"
