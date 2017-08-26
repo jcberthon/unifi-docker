@@ -70,7 +70,9 @@ You could of course avoid all port mapping and simply use `--net=host`, but by
 doing so you give access to the container to your network device(s). If you
 run the container as root, it means someone exploiting a future vulnerability
 in the Unifi Controller software stack could potentially use that to spy on your
-network traffic or worse.
+network traffic or worse. So you are removing the isolation layer between your
+network stack and your container. It is not bad, it is like if you were running
+the Unifi services directly on the host without Docker.
 
 ## Volumes:
 
@@ -86,7 +88,7 @@ network traffic or worse.
 The ports which are not exposed by the container image are marked as such. When
 not specified, assume the port is exposed.
 
-- `3478/udp`: STUN service (for NAT traversal - WebRTC, SIP, etc.)
+- `3478/udp`: STUN service (for NAT traversal - WebRTC, SIP, etc.) - I think it is used only when you use the "cloud" part of the controller, then it uses WebRTC to communicate. I don't use that, so I don't map that port and it is working fine.
 - `5656-5699/udp`: Used for UPA-EDU (not exposed)
 - `6789/tcp`: Speed Test (unifi5 only)
 - `8080/tcp`: Device command/control (API)
