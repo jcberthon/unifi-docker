@@ -20,10 +20,6 @@ build:stable:
     - docker login -u "gitlab-ci-token" -p "$CI_JOB_TOKEN" $CI_REGISTRY
   script:
     - docker build --pull -t "${CI_REGISTRY_IMAGE}/unifi:stable" .
-    - docker run --name "unifi-${CI_JOB_ID}" --detach --init --cap-drop ALL "${CI_REGISTRY_IMAGE}/unifi:stable"
-    - sleep 10
-    - curl --insecure --connect-timeout 10 -f "https://$(docker inspect -f '{{ .NetworkSettings.IPAddress }}' unifi-${CI_JOB_ID}):8443/" >/dev/null
-    - docker rm -f -v "unifi-${CI_JOB_ID}"
     - docker tag  "${CI_REGISTRY_IMAGE}/unifi:stable" "${CI_REGISTRY_IMAGE}/unifi:latest"
     - docker tag  "${CI_REGISTRY_IMAGE}/unifi:stable" "${CI_REGISTRY_IMAGE}/unifi:${VERSION_STABLE}"
     - docker push "${CI_REGISTRY_IMAGE}/unifi:stable"
