@@ -27,24 +27,32 @@ This is a containerized version of [Ubiquiti Network](https://www.ubnt.com/)'s
 Unifi Controller (current stable is version 5.5 branch).
 
 Use `docker run --init --net=host -d jcberthon/unifi`
-to run it using your host network stack (you might want to do better than that
-see below).
+to run it using your host network stack and with default user settings (usually
+this is `root` unless you configured user namespaces), but you might want to do
+better than that see below.
 
 The following options may be of use:
 
 - Set the timezone with `TZ`
 - Use volumes to persist application data: the `data` and `log` volumes
 
-Example to test with (or simply use the docker-compose.yml file in the repository)
+Here are a few examples to test with (or simply use the docker-compose.yml file
+in the repository).
+
+> *Note: the following examples set permissions on the volumes so that the
+container can run with an unprivileged user. However, the docker-compose file
+will run by default the container as root, as it is not possible to set inside
+the yml file the permission correctly, AFAIK.*
 
 ```console
 $ mkdir -p ~/unifi/data
 $ mkdir -p ~/unifi/logs
+$ chown 105:106 ~/unifi/data ~/unifi/logs
 $ docker run --rm --init --cap-drop ALL -e TZ='Europe/Berlin' \
   -p 8080:8080 -p 8443:8443 -p 8843:8843 \
   -v ~/unifi/data:/var/lib/unifi \
   -v ~/unifi/logs:/var/log/unifi \
-  --name unifi jcberthon/unifi
+  --user mongodb --name unifi jcberthon/unifi
 ```
 
 In this example, we drop all privileges, activate port forwarding and it can run
@@ -64,7 +72,7 @@ $ docker run --rm --init --cap-drop ALL -e TZ='Europe/Berlin' \
   -p 8080:8080 -p 8443:8443 -p 8843:8843 -p 10001:10001/udp \
   -v ~/unifi/data:/var/lib/unifi \
   -v ~/unifi/logs:/var/log/unifi \
-  --name unifi jcberthon/unifi
+  --user mongodb --name unifi jcberthon/unifi
 ```
 
 You could of course avoid all port mapping and simply use `--net=host`, but by
@@ -123,7 +131,7 @@ micro-services and running one process per container. Our container includes
 everything the Unifi controller needs, it has notably an embedded MongoDB
 database, along the 3 Java processes which makes the controller. Therefore we
 needed a very lightweight sort of init system. We actually run the official
-init script provided by Ubiquiti. **All services run as a non-privilege user.**
+init script provided by Ubiquiti. **All services can run as a non-privilege user.**
 
 Our solution relies on the Docker-provided `init` daemon (triggered using `--init`)
 which orchestrates running the controller as a service. AFAIU The init function also
@@ -197,8 +205,10 @@ works very good using L3 adoption, it should work with L2 adoption if you
 expose the port `10001/udp` but I haven't tried it.
 
 Note that with the latest update, you do not need to have user namespaces activated,
-I've set-up the Dockerfile so that all services can run as non-root user. So by
-default, your container will run non-root improving your security.
+I've set-up the Dockerfile so that all services can run as non-root user. But this
+feature is not ON by default. You need to add the flags `--user mongodb` to the
+`docker run` command and set permissions appropriately on the volumes for the
+persistent storage (UID should be 105 and GID should be 106).
 
 A small extra touch, I've added a `HEALTHCHECK` directive in the `Dockerfile`, it
 will require you to build the container image with at least Docker 1.12. But it
