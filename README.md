@@ -6,6 +6,14 @@ container with the following principles:
 - Update often, we want security fixes to be includes asap
 - Rolling update of the stable Unifi Controller releases
 
+We have currently the following features to progress towards those goals:
+- We drop all capabilities Docker usually grant to a container, no privilege container;
+- We run the container as a non-root user;
+- We provide instructions so you do not need to use the host network;
+- We have weekly rebuild, so the full stack (from base image to Unifi Controller package);
+- We provide a `stable` tag, which follow the stable branch of Unifi;
+- And of course **it works**!
+
 This project container image can be pulled from:
 * [Docker Hub](https://hub.docker.com/r/jcberthon/unifi/): e.g. `docker pull jcberthon/unifi:stable`
 * [GitLab Registry](https://gitlab.com/huygens/unifi-docker/container_registry): e.g. `docker pull registry.gitlab.com/huygens/unifi-docker/unifi:stable`
@@ -40,14 +48,18 @@ Here are a few examples to test with (or simply use the docker-compose.yml file
 in the repository).
 
 > *Note: the following examples set permissions on the volumes so that the
-container can run with an unprivileged user. However, the docker-compose file
-will run by default the container as root, as it is not possible to set inside
-the yml file the permission correctly, AFAIK.*
+container can run with an unprivileged user. This is because the examples are
+using bind-mount and therefore you must grant permission to read/write/search
+those folders just like if you launched a process as another user which should
+access those folders. The example shows that we are setting both user and group
+ownership, but of course you full flexibility (only setting user or group,
+providing the privileges via the group, using ACLs if your filesystem support
+them, etc.)*
 
 ```console
 $ mkdir -p ~/unifi/data
 $ mkdir -p ~/unifi/logs
-$ chown 105:106 ~/unifi/data ~/unifi/logs
+$ sudo chown 105:106 ~/unifi/data ~/unifi/logs
 $ docker run --rm --init --cap-drop ALL -e TZ='Europe/Berlin' \
   -p 8080:8080 -p 8443:8443 -p 8843:8843 \
   -v ~/unifi/data:/var/lib/unifi \
@@ -64,7 +76,7 @@ I have personally used the DNS and DHCP approach, both works fine.
 A similar example but with the easier L2 adoption, we will need to map the UDP
 port 10001.
 
-*Note that I expect the following to work but I haven't tested it, simply replace
+> *Note that I expect the following to work but I haven't tested it, simply replace
 the last line of the commands given above by:*
 
 ```console
@@ -81,16 +93,39 @@ run the container as root, it means someone exploiting a future vulnerability
 in the Unifi Controller software stack could potentially use that to spy on your
 network traffic or worse. So you are removing the isolation layer between your
 network stack and your container. It is not bad, it is like if you were running
-the Unifi services directly on the host without Docker.
+the Unifi services directly on the host without Docker. Anyway, by default this
+container will run as a non-root user, so you could still use that option and
+have limited security risk.
 
 ## Volumes:
 
 - `/var/lib/unifi`: Configuration data (e.g. `system.properties`)
 - `/var/log/unifi`: Log files (not really needed)
 
+> *Note: Unifi Controller writes also data under the `/var/run/unifi` folder.
+I do not expose that folder in the Dockerfile because I do not need it to
+persist its data (there is a PID file and a json file with information about
+firmware or controller update). But if you think this information should be
+persisted (e.g. when you delete and recreate the container), you can just add
+the volume mapping even if the Dockerfile does not define it.*
+
 ## Environment Variables:
 
 - `TZ`: TimeZone. (i.e "Europe/Berlin")
+
+If you want to set Unifi Controller or JVM environment options, you can add
+them as environment data when spawning your container or edit the `unifi.default`
+file in the current folder and mount the file as a volume (`/etc/default/unifi`),
+if we take the previous examples, that would be:
+
+```console
+$ docker run --rm --init --cap-drop ALL -e TZ='Europe/Berlin' \
+  -p 8080:8080 -p 8443:8443 -p 8843:8843 -p 10001:10001/udp \
+  -v ~/unifi/data:/var/lib/unifi \
+  -v ~/unifi/logs:/var/log/unifi \
+  -v unifi.default:/etc/default/unifi:ro \
+  --user mongodb --name unifi jcberthon/unifi
+```
 
 ## Ports used by the Unifi Controller:
 
@@ -147,6 +182,7 @@ $ docker exec -t 49b9e24a58f8 ps -e -o pid,ppid,cmd
      6      1 /bin/bash /usr/lib/unifi/bin/unifi.init start
     55      6 unifi -home /usr/lib/jvm/java-8-openjdk-amd64 -cp /usr/share/java/commons-daemon.jar:/usr/lib/unifi/lib/ace.jar -p
     56     55 unifi -home /usr/lib/jvm/java-8-openjdk-amd64 -cp /usr/share/java/commons-daemon.jar:/usr/lib/unifi/lib/ace.jar -p
+    56unifi.defaulti -home /usr/lib/jvm/java-8-openjdk-amd64 -cp /usr/share/java/commons-daemon.jar:/usr/lib/unifi/lib/ace.jar -p
     57     55 unifi -home /usr/lib/jvm/java-8-openjdk-amd64 -cp /usr/share/java/commons-daemon.jar:/usr/lib/unifi/lib/ace.jar -p
     70     57 /usr/lib/jvm/java-8-openjdk-amd64/jre/bin/java -Xmx1024M -XX:ErrorFile=/usr/lib/unifi/data/logs/hs_err_pid<pid>.lo
     89     70 bin/mongod --dbpath /usr/lib/unifi/data/db --port 27117 --logappend --logpath logs/mongod.log --nohttpinterface --
@@ -205,10 +241,17 @@ works very good using L3 adoption, it should work with L2 adoption if you
 expose the port `10001/udp` but I haven't tried it.
 
 Note that with the latest update, you do not need to have user namespaces activated,
-I've set-up the Dockerfile so that all services can run as non-root user. But this
-feature is not ON by default. You need to add the flags `--user mongodb` to the
-`docker run` command and set permissions appropriately on the volumes for the
-persistent storage (UID should be 105 and GID should be 106).
+I've set-up the Dockerfile so that all services can run as non-root user and I have
+set a default user (non-root). So you do not need to add special instructions,
+when you spawn your container, it will run as non-root user. You still need to
+specify proper permissions on the bind-mounted folder (UID should be 105 and GID
+should be 106) in order for the processes to have the rights to read or modify
+data. If you use Docker named volumes (the provided `docker-compose.yml` does
+that by default, or you can create them using the `docker volume create ...`
+command), you do not need to specify permissions, Docker will do that to you (at
+least with the `local` driver, the default one).  
+*Note: If you really want to run as root, you can simply add `--user root` to the
+`docker run` command (or `user: root` inside the compose file).*
 
 A small extra touch, I've added a `HEALTHCHECK` directive in the `Dockerfile`, it
 will require you to build the container image with at least Docker 1.12. But it
