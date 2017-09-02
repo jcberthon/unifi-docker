@@ -15,7 +15,9 @@ RUN apt-key adv  \
 # - it selects openjdk-9-jre-headless (Java 9), instead of openjdk-8-jre-headless
 #   without the flag
 # Ubiquiti recommends Java 8, so I do not use the flag.
-RUN echo "deb http://www.ubnt.com/downloads/unifi/debian stable ubiquiti" > /etc/apt/sources.list.d/ubiquiti-unifi.list && \
+RUN apt-get update && \
+    apt-get install -y apt-transport-https && \
+    echo "deb https://www.ubnt.com/downloads/unifi/debian stable ubiquiti" > /etc/apt/sources.list.d/ubiquiti-unifi.list && \
     apt-get update && \
     apt-get install -y curl unifi && \
     apt-get clean -qy && \
@@ -23,7 +25,7 @@ RUN echo "deb http://www.ubnt.com/downloads/unifi/debian stable ubiquiti" > /etc
     chgrp -R mongodb /usr/lib/unifi && \
     chmod g+sw /usr/lib/unifi && \
     rm -Rf /usr/lib/unifi/dl/* && \
-    chmod g+sw /usr/lib/unifi/dl
+    chmod -R g+sw /usr/lib/unifi/dl
 
 EXPOSE 6789/tcp 8080/tcp 8443/tcp 8880/tcp 8843/tcp 3478/udp 10001/udp
 
