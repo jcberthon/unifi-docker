@@ -14,6 +14,11 @@ We have currently the following features to progress towards those goals:
 - We provide a `stable` tag, which follow the stable branch of Unifi;
 - And of course **it works**!
 
+> **WARNING**: in order to guarantee stability of the UID and GID. We are now
+creating a `unifi` dedicated user which will always have the UID 750 and its
+main group is also called `unifi` and has GID 750. When updating you will need
+to perform a change of ownership on your volumes (`chmod -R 750:750 ...`).
+
 This project container image can be pulled from:
 * [Docker Hub](https://hub.docker.com/r/jcberthon/unifi/): e.g. `docker pull jcberthon/unifi:stable`
 * [GitLab Registry](https://gitlab.com/huygens/unifi-docker/container_registry): e.g. `docker pull registry.gitlab.com/huygens/unifi-docker/unifi:stable`
@@ -59,12 +64,12 @@ them, etc.)*
 ```console
 $ mkdir -p ~/unifi/data
 $ mkdir -p ~/unifi/logs
-$ sudo chown 105:106 ~/unifi/data ~/unifi/logs
+$ sudo chown 750:750 ~/unifi/data ~/unifi/logs
 $ docker run --rm --init --cap-drop ALL -e TZ='Europe/Berlin' \
   -p 8080:8080 -p 8443:8443 -p 8843:8843 \
   -v ~/unifi/data:/var/lib/unifi \
   -v ~/unifi/logs:/var/log/unifi \
-  --user mongodb --name unifi jcberthon/unifi
+  --user unifi --name unifi jcberthon/unifi
 ```
 
 In this example, we drop all privileges, activate port forwarding and it can run
@@ -84,7 +89,7 @@ $ docker run --rm --init --cap-drop ALL -e TZ='Europe/Berlin' \
   -p 8080:8080 -p 8443:8443 -p 8843:8843 -p 10001:10001/udp \
   -v ~/unifi/data:/var/lib/unifi \
   -v ~/unifi/logs:/var/log/unifi \
-  --user mongodb --name unifi jcberthon/unifi
+  --user unifi --name unifi jcberthon/unifi
 ```
 
 You could of course avoid all port mapping and simply use `--net=host`, but by
@@ -124,7 +129,7 @@ $ docker run --rm --init --cap-drop ALL -e TZ='Europe/Berlin' \
   -v ~/unifi/data:/var/lib/unifi \
   -v ~/unifi/logs:/var/log/unifi \
   -v unifi.default:/etc/default/unifi:ro \
-  --user mongodb --name unifi jcberthon/unifi
+  --user unifi --name unifi jcberthon/unifi
 ```
 
 ## Ports used by the Unifi Controller:
@@ -152,11 +157,11 @@ See [UniFi - Ports Used](https://help.ubnt.com/hc/en-us/articles/218506997-UniFi
 
 ## Container Content
 
-This container is based on the Docker Hub official image for Ubuntu 16.04 LTS (
-`FROM ubuntu:16.04`). It is possible to use smaller image from Debian but
-Debian 8 has slightly outdated (but up-to-date w.r.t. to security vulnerabilities)
-packages compared to Ubuntu 16.04 (notably it is defaulting to Java 7), and as
-both are the recommended system by Ubiquiti, we selected Ubuntu.
+This container is based on the Docker Hub official image for OpenJDK 8 (
+`FROM openjdk:8-jre-slim`) which is currently based on Debian 9 Stretch. Ubiquiti
+recommends using either Debian or Ubuntu, so that image looks good. The official
+Mongo image is based on Debian 7 Wheezy which means using outdated packages and
+based on OpenJDK 7 by default. Not an option.  
 We did not consider Alpine because of it's use of the musl libc instead of the
 GNU libc. The former is not as well tested and I did not want to do extensive
 tests of MongoDB and Java 8 based on this C library.
@@ -182,7 +187,6 @@ $ docker exec -t 49b9e24a58f8 ps -e -o pid,ppid,cmd
      6      1 /bin/bash /usr/lib/unifi/bin/unifi.init start
     55      6 unifi -home /usr/lib/jvm/java-8-openjdk-amd64 -cp /usr/share/java/commons-daemon.jar:/usr/lib/unifi/lib/ace.jar -p
     56     55 unifi -home /usr/lib/jvm/java-8-openjdk-amd64 -cp /usr/share/java/commons-daemon.jar:/usr/lib/unifi/lib/ace.jar -p
-    56unifi.defaulti -home /usr/lib/jvm/java-8-openjdk-amd64 -cp /usr/share/java/commons-daemon.jar:/usr/lib/unifi/lib/ace.jar -p
     57     55 unifi -home /usr/lib/jvm/java-8-openjdk-amd64 -cp /usr/share/java/commons-daemon.jar:/usr/lib/unifi/lib/ace.jar -p
     70     57 /usr/lib/jvm/java-8-openjdk-amd64/jre/bin/java -Xmx1024M -XX:ErrorFile=/usr/lib/unifi/data/logs/hs_err_pid<pid>.lo
     89     70 bin/mongod --dbpath /usr/lib/unifi/data/db --port 27117 --logappend --logpath logs/mongod.log --nohttpinterface --
@@ -244,8 +248,8 @@ Note that with the latest update, you do not need to have user namespaces activa
 I've set-up the Dockerfile so that all services can run as non-root user and I have
 set a default user (non-root). So you do not need to add special instructions,
 when you spawn your container, it will run as non-root user. You still need to
-specify proper permissions on the bind-mounted folder (UID should be 105 and GID
-should be 106) in order for the processes to have the rights to read or modify
+specify proper permissions on the bind-mounted folder (UID should be 750 and GID
+should be 750) in order for the processes to have the rights to read or modify
 data. If you use Docker named volumes (the provided `docker-compose.yml` does
 that by default, or you can create them using the `docker volume create ...`
 command), you do not need to specify permissions, Docker will do that to you (at
