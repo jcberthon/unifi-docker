@@ -6,11 +6,13 @@ ARG DEBIAN_FRONTEND=noninteractive
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
         apt-transport-https \
+        binutils \
+        curl \
         dirmngr \
         gnupg \
-        binutils \
         jsvc \
         mongodb-server \
+        procps \
     && apt-get clean -qy \
     && rm -rf /var/lib/apt/lists/*
 
