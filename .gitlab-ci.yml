@@ -44,3 +44,22 @@ build:oldstable:
     - docker rmi "${CI_REGISTRY_IMAGE}/unifi:oldstable" "${CI_REGISTRY_IMAGE}/unifi:${VERSION_OLDSTABLE}"
   tags:
     - docker
+
+build:dev:
+  only:
+    - branches
+  except:
+    - master
+    - oldstable
+  before_script:
+    - apk add --no-cache curl gzip
+    - export VERSION_STABLE="$(./ci-get-unifi-version.sh stable)"
+    - docker login -u "gitlab-ci-token" -p "$CI_JOB_TOKEN" $CI_REGISTRY
+  script:
+    - docker build --pull -t "${CI_REGISTRY_IMAGE}/unifi:dev-${VERSION_STABLE}-$CI_COMMIT_REF_SLUG" .
+    - docker tag  "${CI_REGISTRY_IMAGE}/unifi:dev-${VERSION_STABLE}-$CI_COMMIT_REF_SLUG" "${CI_REGISTRY_IMAGE}/unifi:dev-latest"
+    - docker push "${CI_REGISTRY_IMAGE}/unifi:dev-${VERSION_STABLE}-$CI_COMMIT_REF_SLUG"
+    - docker push "${CI_REGISTRY_IMAGE}/unifi:dev-latest"
+    - docker rmi "${CI_REGISTRY_IMAGE}/unifi:dev-${VERSION_STABLE}-$CI_COMMIT_REF_SLUG" "${CI_REGISTRY_IMAGE}/unifi:dev-latest"
+  tags:
+    - docker

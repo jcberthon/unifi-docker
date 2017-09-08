@@ -1,17 +1,17 @@
-# Unifi Controller in a Box - Docker Edition
+# UniFi Controller in a Box - Docker Edition
 
-This project has for purpose to run the Unifi Controller inside a Docker
+This project has for purpose to run the UniFi Controller inside a Docker
 container with the following principles:
 - Minimum privilege basis, we expose or need what's required
 - Update often, we want security fixes to be includes asap
-- Rolling update of the stable Unifi Controller releases
+- Rolling update of the stable UniFi Controller releases
 
 We have currently the following features to progress towards those goals:
 - We drop all capabilities Docker usually grant to a container, no privilege container;
 - We run the container as a non-root user;
 - We provide instructions so you do not need to use the host network;
-- We have weekly rebuild, so the full stack (from base image to Unifi Controller package);
-- We provide a `stable` tag, which follow the stable branch of Unifi;
+- We have weekly rebuild, so the full stack (from base image to UniFi Controller package);
+- We provide a `stable` tag, which follow the stable branch of UniFi;
 - And of course **it works**!
 
 > **WARNING**: in order to guarantee stability of the UID and GID. We are now
@@ -37,9 +37,9 @@ On **GitLab Container Registry**:
 ## Description
 
 This is a containerized version of [Ubiquiti Network](https://www.ubnt.com/)'s
-Unifi Controller (current stable is version 5.5 branch).
+UniFi Controller (current stable is version 5.5 branch).
 
-Use `docker run --init --net=host -d jcberthon/unifi`
+Use `docker run --net=host -d jcberthon/unifi`
 to run it using your host network stack and with default user settings (usually
 this is `root` unless you configured user namespaces), but you might want to do
 better than that see below.
@@ -65,7 +65,7 @@ them, etc.)*
 $ mkdir -p ~/unifi/data
 $ mkdir -p ~/unifi/logs
 $ sudo chown 750:750 ~/unifi/data ~/unifi/logs
-$ docker run --rm --init --cap-drop ALL -e TZ='Europe/Berlin' \
+$ docker run --rm --cap-drop ALL -e TZ='Europe/Berlin' \
   -p 8080:8080 -p 8443:8443 -p 8843:8843 \
   -v ~/unifi/data:/var/lib/unifi \
   -v ~/unifi/logs:/var/log/unifi \
@@ -74,7 +74,7 @@ $ docker run --rm --init --cap-drop ALL -e TZ='Europe/Berlin' \
 
 In this example, we drop all privileges, activate port forwarding and it can run
 on a Docker host with user namespaces configured. However, note that in this
-configuration you will need to follow the [Unifi Layer 3 methods for adoption and management]
+configuration you will need to follow the [UniFi Layer 3 methods for adoption and management]
 (https://help.ubnt.com/hc/en-us/articles/204909754-UniFi-Layer-3-methods-for-UAP-adoption-and-management).  
 I have personally used the DNS and DHCP approach, both works fine.
 
@@ -85,7 +85,7 @@ port 10001.
 the last line of the commands given above by:*
 
 ```console
-$ docker run --rm --init --cap-drop ALL -e TZ='Europe/Berlin' \
+$ docker run --rm --cap-drop ALL -e TZ='Europe/Berlin' \
   -p 8080:8080 -p 8443:8443 -p 8843:8843 -p 10001:10001/udp \
   -v ~/unifi/data:/var/lib/unifi \
   -v ~/unifi/logs:/var/log/unifi \
@@ -95,10 +95,10 @@ $ docker run --rm --init --cap-drop ALL -e TZ='Europe/Berlin' \
 You could of course avoid all port mapping and simply use `--net=host`, but by
 doing so you give access to the container to your network device(s). If you
 run the container as root, it means someone exploiting a future vulnerability
-in the Unifi Controller software stack could potentially use that to spy on your
+in the UniFi Controller software stack could potentially use that to spy on your
 network traffic or worse. So you are removing the isolation layer between your
 network stack and your container. It is not bad, it is like if you were running
-the Unifi services directly on the host without Docker. Anyway, by default this
+the UniFi services directly on the host without Docker. Anyway, by default this
 container will run as a non-root user, so you could still use that option and
 have limited security risk.
 
@@ -107,7 +107,7 @@ have limited security risk.
 - `/var/lib/unifi`: Configuration data (e.g. `system.properties`)
 - `/var/log/unifi`: Log files (not really needed)
 
-> *Note: Unifi Controller writes also data under the `/var/run/unifi` folder.
+> *Note: UniFi Controller writes also data under the `/var/run/unifi` folder.
 I do not expose that folder in the Dockerfile because I do not need it to
 persist its data (there is a PID file and a json file with information about
 firmware or controller update). But if you think this information should be
@@ -118,13 +118,13 @@ the volume mapping even if the Dockerfile does not define it.*
 
 - `TZ`: TimeZone. (i.e "Europe/Berlin")
 
-If you want to set Unifi Controller or JVM environment options, you can add
+If you want to set UniFi Controller or JVM environment options, you can add
 them as environment data when spawning your container or edit the `unifi.default`
 file in the current folder and mount the file as a volume (`/etc/default/unifi`),
 if we take the previous examples, that would be:
 
 ```console
-$ docker run --rm --init --cap-drop ALL -e TZ='Europe/Berlin' \
+$ docker run --rm --cap-drop ALL -e TZ='Europe/Berlin' \
   -p 8080:8080 -p 8443:8443 -p 8843:8843 -p 10001:10001/udp \
   -v ~/unifi/data:/var/lib/unifi \
   -v ~/unifi/logs:/var/log/unifi \
@@ -132,7 +132,7 @@ $ docker run --rm --init --cap-drop ALL -e TZ='Europe/Berlin' \
   --user unifi --name unifi jcberthon/unifi
 ```
 
-## Ports used by the Unifi Controller:
+## Ports used by the UniFi Controller:
 
 The ports which are not exposed by the container image are marked as such. When
 not specified, assume the port is exposed.
@@ -168,22 +168,31 @@ tests of MongoDB and Java 8 based on this C library.
 
 Our approach does not strictly follows Docker best practices with respect to
 micro-services and running one process per container. Our container includes
-everything the Unifi controller needs, it has notably an embedded MongoDB
+everything the UniFi controller needs, it has notably an embedded MongoDB
 database, along the 3 Java processes which makes the controller. Therefore we
 needed a very lightweight sort of init system. We actually run the official
-init script provided by Ubiquiti. **All services can run as a non-privilege user.**
+init script provided by Ubiquiti which make use of `jsvc` which provides signal
+handling and multi-process spawning and watching. **All services can run as a
+non-privilege user.**
 
-Our solution relies on the Docker-provided `init` daemon (triggered using `--init`)
-which orchestrates running the controller as a service. AFAIU The init function also
-traps SIGTERM to issue the appropriate stop command to the Unifi controller processes
-in the hopes that it helps keep the shutdown graceful.
+Our solution originally relied on the Docker-provided `init` daemon (triggered
+using `--init`) which provides proper signal handling (catching of SIGTERM, and
+"propagation" of signals to childs) and zombie reaping. So the init function
+traps SIGTERM to issue the appropriate stop command to the UniFi controller
+processes so that they shutdown gracefully. It also prevents zombie to linger
+and accumulate. However, this solution relied on Docker 1.13+ which is still
+not widely available (many vendors are still only providing Docker 1.12 or older
+versions). Therefore, the current solution is to embed a tiny init process, the
+same that Docker chose to implement its `init` option: [tini]
+(https://github.com/krallin/tini). It offers the signal handlings and zombie
+reaping we wanted and it is very tiny (<100KB).
 
 Example seen within the container after it was started
 
 ```console
 $ docker exec -t 49b9e24a58f8 ps -e -o pid,ppid,cmd
    PID   PPID CMD
-     1      0 /dev/init -- /usr/lib/unifi/bin/unifi.init start
+     1      0 /sbin/init -- /usr/lib/unifi/bin/unifi.init start
      6      1 /bin/bash /usr/lib/unifi/bin/unifi.init start
     55      6 unifi -home /usr/lib/jvm/java-8-openjdk-amd64 -cp /usr/share/java/commons-daemon.jar:/usr/lib/unifi/lib/ace.jar -p
     56     55 unifi -home /usr/lib/jvm/java-8-openjdk-amd64 -cp /usr/share/java/commons-daemon.jar:/usr/lib/unifi/lib/ace.jar -p
@@ -210,14 +219,14 @@ by changing them you could break the controller (especially if you try to change
 the data and log folders, but do not change the volumes of the container).
 
 The possible parameters can be (they are described in the unifi.default file in much details):
-* `UNIFI_DATA_DIR`: data folder for Unifi Controller, change with caution
-* `UNIFI_LOG_DIR`: log folder for Unifi Controller, change with caution
-* `UNIFI_RUN_DIR`: runtime folder for Unifi Controller
+* `UNIFI_DATA_DIR`: data folder for UniFi Controller, change with caution
+* `UNIFI_LOG_DIR`: log folder for UniFi Controller, change with caution
+* `UNIFI_RUN_DIR`: runtime folder for UniFi Controller
 * `JAVA_ENTROPY_GATHER_DEVICE`: advanced parameter, most people should not require it
 * `JVM_MAX_HEAP_SIZE`: limit the JVM maximum heap size (for home and SOHO, 512M or 1024M is a good value)
 * `JVM_INIT_HEAP_SIZE`: minimum JVM heap size (on startup), usually not needed
 * `UNIFI_JVM_EXTRA_OPTS`: additional JVM parameters can be added here
-* `ENABLE_UNIFI`: boolean ('yes' or 'no') leave it to 'yes' or unset, as you want the Unifi Controller to run
+* `ENABLE_UNIFI`: boolean ('yes' or 'no') leave it to 'yes' or unset, as you want the UniFi Controller to run
 * `JSVC_EXTRA_OPTS`: jsvc(the Java as a service command), this option should contain at least "-nodetach"
 
 ## Changelog
@@ -227,12 +236,12 @@ However, there is little left of the original project and not really chances of
 merging. So I've decided to cut the link between the parent project and this one.
 Anyway, thank you @jacobalberty for getting me kick started on this.
 
-The first change compare to original fork is that I use the Docker init and the
-Unifi Controller init script. So I could remove a lot of unecessary stuff.
+The first change compare to original fork is that I use `tini` init process and
+the UniFi Controller init script. So I could remove a lot of unecessary stuff.
 
-In addition, I use the [Debian/Ubuntu APT repository from Unifi](https://help.ubnt.com/hc/en-us/articles/220066768-UniFi-How-to-Install-Update-via-APT-on-Debian-or-Ubuntu)
+In addition, I use the [Debian/Ubuntu APT repository from UniFi](https://help.ubnt.com/hc/en-us/articles/220066768-UniFi-How-to-Install-Update-via-APT-on-Debian-or-Ubuntu)
 instead of downloading individual packages, this avoids changing the Dockerfile
-for each new release from Unifi. I simply need to rebuild my image. In addition,
+for each new release from UniFi. I simply need to rebuild my image. In addition,
 Ubiquiti is using "rolling updates" so that by using the "stable" branch you get
 always the latest stable release (was 5.4.x when I started, is now 5.5.x at time
 of edition)

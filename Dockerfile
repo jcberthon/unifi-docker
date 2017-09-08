@@ -1,6 +1,7 @@
 FROM openjdk:8-jre-slim
 
 ARG DEBIAN_FRONTEND=noninteractive
+ARG TINI_VERSION=v0.16.1
 
 # Install Ubiquiti UniFi Controller dependencies
 RUN apt-get update \
@@ -14,12 +15,17 @@ RUN apt-get update \
         mongodb-server \
         procps \
     && apt-get clean -qy \
-    && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/* \
+    && curl -L https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini-amd64 -o /sbin/tini \
+    && curl -L https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini-amd64.asc -o /sbin/tini.asc \
+    && gpg --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys 595E85A6B1B4779EA4DAAEC70B588DFF0527A9B7 \
+    && gpg --verify /sbin/tini.asc \
+    && rm -f /sbin/tini.asc \
+    && chmod 0755 /sbin/tini \
+    && apt-key adv  \
+        --keyserver hkp://keyserver.ubuntu.com \
+        --recv 4A228B2D358A5094178285BE06E85760C0A52C50
 
-# Import GPG key
-RUN apt-key adv  \
-    --keyserver hkp://keyserver.ubuntu.com \
-    --recv 4A228B2D358A5094178285BE06E85760C0A52C50
 
 
 # Install Ubiquiti UniFi Controller
@@ -57,5 +63,5 @@ HEALTHCHECK --interval=30s --timeout=3s --retries=5 --start-period=30s \
 VOLUME ["/var/lib/unifi", "/var/log/unifi"]
 
 # execute the controller by using the init script and the `init` option of Docker
-ENTRYPOINT ["/usr/lib/unifi/bin/unifi.init"]
+ENTRYPOINT ["/sbin/tini", "--", "/usr/lib/unifi/bin/unifi.init"]
 CMD ["start"]
