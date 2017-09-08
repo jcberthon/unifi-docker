@@ -18,13 +18,11 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/* \
     && curl -L https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini-amd64 -o /sbin/tini \
     && curl -L https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini-amd64.asc -o /sbin/tini.asc \
-    && gpg --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys 595E85A6B1B4779EA4DAAEC70B588DFF0527A9B7 \
+    && gpg --keyserver hkp://keyserver.ubuntu.com --recv-keys 595E85A6B1B4779EA4DAAEC70B588DFF0527A9B7 \
     && gpg --verify /sbin/tini.asc \
     && rm -f /sbin/tini.asc \
     && chmod 0755 /sbin/tini \
-    && apt-key adv  \
-        --keyserver hkp://keyserver.ubuntu.com \
-        --recv 4A228B2D358A5094178285BE06E85760C0A52C50
+    && apt-key adv --keyserver hkp://keyserver.ubuntu.com --recv 4A228B2D358A5094178285BE06E85760C0A52C50
 
 
 
