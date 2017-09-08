@@ -1,4 +1,4 @@
-version: '2.2'
+version: '2.1'
 
 services:
   unifi:
@@ -11,7 +11,6 @@ services:
     container_name: unifi
     mem_limit: 1024m
     memswap_limit: 1536m
-    init: true
     cap_drop:
       - ALL
     ports:
