@@ -35,20 +35,20 @@ if [[ "${SOURCE_BRANCH}" == "master" ]]; then
 
   tag_branch "latest"
   tag_branch "${CHANNEL_VERSION}"
-  tag_branch "${CHANNEL_VERSION}-${SHA_COMMIT}"
+  tag_branch "${CHANNEL_VERSION}-s${SHA_COMMIT}"
   tag_branch "${CHANNEL_SHORT_VERSION}"
 elif [[ "${SOURCE_BRANCH}" == "oldstable" ]]; then
   CHANNEL_VERSION="$(ci-get-unifi-version ${SOURCE_BRANCH} amd64)"
   CHANNEL_SHORT_VERSION="$(echo ${CHANNEL_VERSION} | cut -d. -f-2)"
 
   tag_branch "${CHANNEL_VERSION}"
-  tag_branch "${CHANNEL_VERSION}-${SHA_COMMIT}"
+  tag_branch "${CHANNEL_VERSION}-s${SHA_COMMIT}"
   tag_branch "${CHANNEL_SHORT_VERSION}"
 elif [[ "${SOURCE_BRANCH}" == "testing" ]]; then
   CHANNEL_VERSION="$(ci-get-unifi-version ${SOURCE_BRANCH} amd64)"
   CHANNEL_SHORT_VERSION="$(echo ${CHANNEL_VERSION} | cut -d. -f-2)"
 
   tag_branch "${CHANNEL_VERSION}"
-  tag_branch "${CHANNEL_VERSION}-${SHA_COMMIT}"
+  tag_branch "${CHANNEL_VERSION}-s${SHA_COMMIT}"
   tag_branch "${CHANNEL_SHORT_VERSION}"
 fi
