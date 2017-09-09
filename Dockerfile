@@ -1,5 +1,8 @@
-FROM openjdk:8-jre-slim
+ARG BASEIMG=openjdk
+ARG BASEVERS=8-jre-slim
+FROM ${BASEIMG}:${BASEVERS}
 
+ARG ARCH=amd64
 ARG DEBIAN_FRONTEND=noninteractive
 ARG TINI_VERSION=v0.16.1
 
@@ -16,8 +19,8 @@ RUN apt-get update \
         procps \
     && apt-get clean -qy \
     && rm -rf /var/lib/apt/lists/* \
-    && curl -L https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini-amd64 -o /sbin/tini \
-    && curl -L https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini-amd64.asc -o /sbin/tini.asc \
+    && curl -L https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini-${ARCH} -o /sbin/tini \
+    && curl -L https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini-${ARCH}.asc -o /sbin/tini.asc \
     && gpg --keyserver hkp://keyserver.ubuntu.com --recv-keys 595E85A6B1B4779EA4DAAEC70B588DFF0527A9B7 \
     && gpg --verify /sbin/tini.asc \
     && rm -f /sbin/tini.asc \

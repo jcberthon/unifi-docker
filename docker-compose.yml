@@ -5,6 +5,10 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        BASEIMG: ${ARG_BASEIMG:-openjdk}
+        BASEVERS: ${ARG_BASEVERS:-8-jre-slim}
+        ARCH: ${ARG_ARCH:-amd64}
     image: "${CI_REGISTRY_IMAGE:-jcberthon/unifi}:${IMAGE_TAG:-latest}"
     restart: always
     hostname: 'unifi'
