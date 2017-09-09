@@ -64,6 +64,27 @@ build:oldstable:amd64:
   tags:
     - docker
 
+build:testing:amd64:
+  only:
+    - master
+  before_script:
+    - apk add --no-cache curl gzip
+    - uname -a
+    - docker version
+    - export VERSION_TESTING="$(./ci-get-unifi-version.sh testing)"
+    - export BRANCH_VERSION="$(echo ${VERSION_STABLE} | cut -d. -f-2)"
+    - docker login -u "gitlab-ci-token" -p "$CI_JOB_TOKEN" $CI_REGISTRY
+  script:
+    - docker build --pull -t "${CI_REGISTRY_IMAGE}/unifi:testing" .
+    - docker tag  "${CI_REGISTRY_IMAGE}/unifi:testing" "${CI_REGISTRY_IMAGE}/unifi:${VERSION_TESTING}"
+    - docker tag  "${CI_REGISTRY_IMAGE}/unifi:testing" "${CI_REGISTRY_IMAGE}/unifi:${BRANCH_VERSION}"
+    - docker push "${CI_REGISTRY_IMAGE}/unifi:testing"
+    - docker push "${CI_REGISTRY_IMAGE}/unifi:${VERSION_TESTING}"
+    - docker push "${CI_REGISTRY_IMAGE}/unifi:${BRANCH_VERSION}"
+    - docker rmi "${CI_REGISTRY_IMAGE}/unifi:testing" "${CI_REGISTRY_IMAGE}/unifi:${VERSION_TESTING}"
+  tags:
+    - docker
+
 build:dev:amd64:
   only:
     - branches
