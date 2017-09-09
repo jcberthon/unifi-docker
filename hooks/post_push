@@ -7,6 +7,14 @@ function tag_branch {
   docker push "${DOCKER_REPO}:$1"
 }
 
+function ci-get-unifi-version {
+  UNIFI_CHANNEL="$1"
+  ARG_ARCH="${2:-amd64}"
+
+  curl -sSL "https://www.ubnt.com/downloads/unifi/debian/dists/${UNIFI_CHANNEL}/ubiquiti/binary-${ARG_ARCH:-amd64}/Packages.gz" \
+    | zgrep Version | sed -rn 's/Version: ([[:digit:]].[[:digit:]].[[:digit:]]+)-.*/\1/p'
+}
+
 # For unofficial documentation, see: https://docs.docker.com/docker-cloud/builds/advanced/
 # Available variables:
 # - `SOURCE_BRANCH`: the name of the branch or the tag that is currently being tested.
@@ -18,16 +26,29 @@ function tag_branch {
 #
 # SHA_COMMIT=${SOURCE_COMMIT:0:8}
 
+SHA_COMMIT="$(echo ${GIT_SHA1} | cut -b-8)"
+
 if [[ "${SOURCE_BRANCH}" == "master" ]]; then
   CHANNEL_NAME="stable"
-  CHANNEL_VERSION="$(curl -sSL "http://www.ubnt.com/downloads/unifi/debian/dists/${CHANNEL_NAME}/ubiquiti/binary-armhf/Packages.gz" \
-    | zgrep Version | sed -rn 's/Version: ([[:digit:]].[[:digit:]].[[:digit:]]+)-.*/\1/p')"
+  CHANNEL_VERSION="$(ci-get-unifi-version ${CHANNEL_NAME} amd64)"
+  CHANNEL_SHORT_VERSION="$(echo ${CHANNEL_VERSION} | cut -d. -f-2)"
 
   tag_branch "latest"
   tag_branch "${CHANNEL_VERSION}"
+  tag_branch "${CHANNEL_VERSION}-${SHA_COMMIT}"
+  tag_branch "${CHANNEL_SHORT_VERSION}"
 elif [[ "${SOURCE_BRANCH}" == "oldstable" ]]; then
-  CHANNEL_VERSION="$(curl -sSL "http://www.ubnt.com/downloads/unifi/debian/dists/${SOURCE_BRANCH}/ubiquiti/binary-armhf/Packages.gz" \
-    | zgrep Version | sed -rn 's/Version: ([[:digit:]].[[:digit:]].[[:digit:]]+)-.*/\1/p')"
+  CHANNEL_VERSION="$(ci-get-unifi-version ${SOURCE_BRANCH} amd64)"
+  CHANNEL_SHORT_VERSION="$(echo ${CHANNEL_VERSION} | cut -d. -f-2)"
 
   tag_branch "${CHANNEL_VERSION}"
+  tag_branch "${CHANNEL_VERSION}-${SHA_COMMIT}"
+  tag_branch "${CHANNEL_SHORT_VERSION}"
+elif [[ "${SOURCE_BRANCH}" == "testing" ]]; then
+  CHANNEL_VERSION="$(ci-get-unifi-version ${SOURCE_BRANCH} amd64)"
+  CHANNEL_SHORT_VERSION="$(echo ${CHANNEL_VERSION} | cut -d. -f-2)"
+
+  tag_branch "${CHANNEL_VERSION}"
+  tag_branch "${CHANNEL_VERSION}-${SHA_COMMIT}"
+  tag_branch "${CHANNEL_SHORT_VERSION}"
 fi
