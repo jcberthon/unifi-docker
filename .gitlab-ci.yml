@@ -66,7 +66,7 @@ build:oldstable:amd64:
 
 build:testing:amd64:
   only:
-    - master
+    - testing
   before_script:
     - apk add --no-cache curl gzip
     - uname -a
