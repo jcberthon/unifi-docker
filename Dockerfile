@@ -64,5 +64,8 @@ HEALTHCHECK --interval=30s --timeout=3s --retries=5 --start-period=30s \
 VOLUME ["/var/lib/unifi", "/var/log/unifi"]
 
 # execute the controller by using the init script and the `init` option of Docker
-ENTRYPOINT ["/sbin/tini", "--", "/usr/lib/unifi/bin/unifi.init"]
+# Requires to send the TERM signal to all process as JSVC does not know mongod
+# was launched by the Unifi application. Therefore mongod was not shutdown
+# cleanly.
+ENTRYPOINT ["/sbin/tini", "-g", "--", "/usr/lib/unifi/bin/unifi.init"]
 CMD ["start"]
