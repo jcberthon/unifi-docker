@@ -59,7 +59,7 @@ Here are a few examples to test with (or simply use the docker-compose.yml file
 in the repository).
 
 > *Note: the following examples set permissions on the volumes so that the
-container can run with an unprivileged user. This is because the examples are
+container can run with an **unprivileged user**. This is because the examples are
 using bind-mount and therefore you must grant permission to read/write/search
 those folders just like if you launched a process as another user which should
 access those folders. The example shows that we are setting both user and group
@@ -75,7 +75,7 @@ $ docker run --rm --cap-drop ALL -e TZ='Europe/Berlin' \
   -p 8080:8080 -p 8443:8443 -p 8843:8843 \
   -v ~/unifi/data:/var/lib/unifi \
   -v ~/unifi/logs:/var/log/unifi \
-  --user unifi --name unifi jcberthon/unifi
+  --name unifi jcberthon/unifi
 ```
 
 In this example, we drop all privileges, activate port forwarding and it can run
@@ -95,7 +95,7 @@ $ docker run --rm --cap-drop ALL -e TZ='Europe/Berlin' \
   -p 8080:8080 -p 8443:8443 -p 8843:8843 -p 10001:10001/udp \
   -v ~/unifi/data:/var/lib/unifi \
   -v ~/unifi/logs:/var/log/unifi \
-  --user unifi --name unifi jcberthon/unifi
+  --name unifi jcberthon/unifi
 ```
 
 You could of course avoid all port mapping and simply use `--net=host`, but by
@@ -135,7 +135,7 @@ $ docker run --rm --cap-drop ALL -e TZ='Europe/Berlin' \
   -v ~/unifi/data:/var/lib/unifi \
   -v ~/unifi/logs:/var/log/unifi \
   -v unifi.default:/etc/default/unifi:ro \
-  --user unifi --name unifi jcberthon/unifi
+  --name unifi jcberthon/unifi
 ```
 
 ## Ports used by the UniFi Controller:
@@ -160,6 +160,38 @@ A container should at least redirect port 8443/tcp and port 8843/tcp (if usage o
 guest network is required).
 
 See [UniFi - Ports Used](https://help.ubnt.com/hc/en-us/articles/218506997-UniFi-Ports-Used)
+
+## Running the container on low-memory devices
+
+Our image is based on Java 8u131 or newer, therefore the JVM is container aware,
+it is able to optimise itself to support the CPU and RAM limits set on the
+container (based on the CGroups limits). Therefore, the JVM will adapt to the
+resource limits you will give the container (e.g. if you use the `--cpus 2.0` or
+`--memory 2048m`). Our current approach is that the JVM process could use up to
+half of the container allowed max memory, the other half can be used by the MongoDB
+database. Not that for a home usage (one AP and one switch), the memory usage of
+the container did not exceed 600MB with the current 5.5 branch.
+
+I haven't tried running it on devices with less than 1GB. But on devices with 1GB
+of RAM or less, you should make sure that the Java process can allocate up to 512MB
+heap. This means, you will need to set the maximum heap size manually to 512.
+
+In addition, it is recommended to limit the memory of the complete container. E.g.
+if you have 1GB RAM, limit the memory to 768MB so your system (kernel, etc.) 
+always so breathing room. And with this setting, there is still enough memory
+for MongoDB.
+
+Example with limits to 768MB memory:
+
+```console
+$ docker run --rm --cap-drop ALL \
+  -e JVM_MAX_HEAP_SIZE="512m" \
+  --memory 768m \
+  -p 8080:8080 -p 8443:8443 -p 8843:8843 -p 10001:10001/udp \
+  -v ~/unifi/data:/var/lib/unifi \
+  -v ~/unifi/logs:/var/log/unifi \
+  --name unifi jcberthon/unifi
+```
 
 ## Container Content
 
