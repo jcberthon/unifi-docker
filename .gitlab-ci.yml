@@ -46,7 +46,7 @@ build:oldstable:amd64:
   before_script:
     - apk add --no-cache curl gzip
     - export VERSION_OLDSTABLE="$(./ci-get-unifi-version.sh oldstable)"
-    - export BRANCH_VERSION="$(echo ${VERSION_STABLE} | cut -d. -f-2)"
+    - export BRANCH_VERSION="$(echo ${VERSION_OLDSTABLE} | cut -d. -f-2)"
     - export SHA_COMMIT="$(echo ${CI_COMMIT_SHA} | cut -b-8)"
     - docker login -u "gitlab-ci-token" -p "$CI_JOB_TOKEN" $CI_REGISTRY
   script:
@@ -70,7 +70,7 @@ build:testing:amd64:
   before_script:
     - apk add --no-cache curl gzip
     - export VERSION_TESTING="$(./ci-get-unifi-version.sh testing)"
-    - export BRANCH_VERSION="$(echo ${VERSION_STABLE} | cut -d. -f-2)"
+    - export BRANCH_VERSION="$(echo ${VERSION_TESTING} | cut -d. -f-2)"
     - export SHA_COMMIT="$(echo ${CI_COMMIT_SHA} | cut -b-8)"
     - docker login -u "gitlab-ci-token" -p "$CI_JOB_TOKEN" $CI_REGISTRY
   script:
