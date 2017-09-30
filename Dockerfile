@@ -30,7 +30,7 @@ RUN apt-get update \
 
 
 # Install Ubiquiti UniFi Controller
-RUN echo "deb https://www.ubnt.com/downloads/unifi/debian stable ubiquiti" > /etc/apt/sources.list.d/ubiquiti-unifi.list \
+RUN echo "deb https://www.ubnt.com/downloads/unifi/debian testing ubiquiti" > /etc/apt/sources.list.d/ubiquiti-unifi.list \
     && apt-get update \
     && apt-get install -y --no-install-recommends \
         unifi \
