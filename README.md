@@ -17,7 +17,9 @@ We have currently the following features to progress towards those goals:
 > **WARNING**: in order to guarantee stability of the UID and GID. We are now
 creating a `unifi` dedicated user which will always have the UID 750 and its
 main group is also called `unifi` and has GID 750. When updating you will need
-to perform a change of ownership on your volumes (`chmod -R 750:750 ...`).
+to perform a change of ownership on your volumes (`chmod -R 750:750 ...`).  
+This feature is compatible with the up-coming UniFi Controller 5.6 which supports
+a similar feature.
 
 This project container image can be pulled from:
 * [Docker Hub](https://hub.docker.com/r/jcberthon/unifi/): e.g. `docker pull jcberthon/unifi:stable`
@@ -27,16 +29,18 @@ This project container image can be pulled from:
 On **Docker Hub**:
 * [`latest`, `stable` (Dockerfile)](https://github.com/jcberthon/unifi-docker/blob/master/Dockerfile): currently unifi-5.5 branch
 * [`oldstable` (Dockerfile)](https://github.com/jcberthon/unifi-docker/blob/oldstable/Dockerfile): currently unifi-5.4 branch
-* You will find specific versions (as they build), e.g. `5.5.20` or `5.4.19` or etc.
-* And "branched versions" tag such as `5.5`, `5.4` which always point to the latest release within a branch (e.g. the most recent `5.5.x` release).
-* "Build" versions per release (e.g. `5.5.20-syyyyyyyy`), on GitHub/DockerHub I'm using the first 8 characters of the SHA1 commit ID. The purpose is when I'm changing my image definition but UniFi Controller release has not changed, I need to distinguish between the previous and newer image although both are `5.5.20` variants. So when a user picks one the "built" image he is sure to get the same image definition.
+* [`testing` (Dockerfile)](https://github.com/jcberthon/unifi-docker/blob/testing/Dockerfile): *experimental* currently unifi-5.6 branch
+* You will find specific versions (as they build), e.g. `5.5.24` or `5.4.19` or `5.6.19` or etc.
+* And "branched versions" tag such as `5.5`, `5.4` and `5.6` which always point to the latest release within a branch (e.g. the most recent `5.5.x` release).
+* "Build" versions per release (e.g. `5.5.24-syyyyyyyy`), on GitHub/DockerHub I'm using the first 8 characters of the SHA1 commit ID. The purpose is when I'm changing my image definition but UniFi Controller release has not changed, I need to distinguish between the previous and newer image although both are `5.5.24` variants. So when a user picks one the "built" image he is sure to get the same image definition.
 
 On **GitLab Container Registry**:
 * [`latest`, `stable` (Dockerfile)](https://gitlab.com/huygens/unifi-docker/blob/master/Dockerfile): currently unifi-5.5 branch
 * [`oldstable` (Dockerfile)](https://gitlab.com/huygens/unifi-docker/blob/oldstable/Dockerfile): currently unifi-5.4 branch
-* You will find specific versions (as they build), e.g. `5.5.20` or `5.4.19` or etc.
-* And "branched versions" tag such as `5.5`, `5.4` which always point to the latest release within a branch (e.g. the most recent `5.5.x` release).
-* "Build" versions per release (e.g. `5.5.20-bxxxx` or `5.5.20-syyyyyyyy`), on GitLab Registry I'm using the Build ID of the CI Pipeline and the first 8 characters of the SHA1 commit ID (see above for details). So for each new build of the same release, you get a different Build ID even if there was no new commit (but the underlying base image could have changed).
+* [`testing` (Dockerfile)](https://gitlab.com/huygens/unifi-docker/blob/testing/Dockerfile): *experimental* currently unifi-5.6 branch
+* You will find specific versions (as they build), e.g. `5.5.24` or `5.4.19` or `5.6.19` or etc.
+* And "branched versions" tag such as `5.5`, `5.4` and `5.6` which always point to the latest release within a branch (e.g. the most recent `5.5.x` release).
+* "Build" versions per release (e.g. `5.5.24-bxxxx` or `5.5.24-syyyyyyyy`), on GitLab Registry I'm using the Build ID of the CI Pipeline and the first 8 characters of the SHA1 commit ID (see above for details). So for each new build of the same release, you get a different Build ID even if there was no new commit (but the underlying base image could have changed).
 
 My recommendation is to either stick to a "rolling tag" (e.g. `stable`) or to pick one of the build tag (for better repeatability, e.g. `5.5.20-b11594497` or `5.5.20-s4255dc00`).
 
