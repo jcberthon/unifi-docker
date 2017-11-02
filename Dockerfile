@@ -37,7 +37,8 @@ RUN groupadd -g 750 -o unifi \
     && apt-get install -y --no-install-recommends \
         unifi \
     && apt-get clean -qy \
-    && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/* \
+    && find /usr/lib/unifi/dl/firmware -mindepth 1 \! -name bundles.json -delete
 
 EXPOSE 6789/tcp 8080/tcp 8443/tcp 8880/tcp 8843/tcp 3478/udp 10001/udp
 
