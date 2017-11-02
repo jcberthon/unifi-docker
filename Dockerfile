@@ -37,8 +37,7 @@ RUN groupadd -g 750 -o unifi \
     && apt-get install -y --no-install-recommends \
         unifi \
     && apt-get clean -qy \
-    && rm -rf /var/lib/apt/lists/* \
-    && rm -Rf /usr/lib/unifi/dl/*
+    && rm -rf /var/lib/apt/lists/*
 
 EXPOSE 6789/tcp 8080/tcp 8443/tcp 8880/tcp 8843/tcp 3478/udp 10001/udp
 
@@ -47,11 +46,11 @@ COPY unifi.default /etc/default/unifi
 # Enable running Unifi Controller as a standard user
 # It requires that we create certain folders and links first
 # with the right user ownership and permissions.
-RUN mkdir -p -m 775 /var/lib/unifi /var/log/unifi /var/run/unifi && \
-    ln -sf /var/lib/unifi /usr/lib/unifi/data && \
-    ln -sf /var/log/unifi /usr/lib/unifi/logs && \
-    ln -sf /var/run/unifi /usr/lib/unifi/run && \
-    chown unifi:unifi /var/lib/unifi /var/log/unifi /var/run/unifi
+RUN mkdir -p -m 755 /var/lib/unifi /var/log/unifi /var/run/unifi /usr/lib/unifi/work \
+    && ln -sf /var/lib/unifi /usr/lib/unifi/data \
+    && ln -sf /var/log/unifi /usr/lib/unifi/logs \
+    && ln -sf /var/run/unifi /usr/lib/unifi/run \
+    && chown unifi:unifi /var/lib/unifi /var/log/unifi /var/run/unifi /usr/lib/unifi/work
 USER unifi
 
 # Add healthcheck (requires Docker 1.12)
