@@ -32,7 +32,7 @@ RUN apt-get update \
 # Install Ubiquiti UniFi Controller
 RUN groupadd -g 750 -o unifi \
     && useradd -u 750 -o -g unifi -M unifi \
-    && echo "deb https://www.ubnt.com/downloads/unifi/debian stable ubiquiti" > /etc/apt/sources.list.d/ubiquiti-unifi.list \
+    && echo "deb https://www.ubnt.com/downloads/unifi/debian unifi-5.6 ubiquiti" > /etc/apt/sources.list.d/ubiquiti-unifi.list \
     && apt-get update \
     && apt-get install -y --no-install-recommends \
         unifi \

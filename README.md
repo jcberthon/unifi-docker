@@ -14,6 +14,12 @@ We have currently the following features to progress towards those goals:
 - We provide a `stable` tag, which follow the stable branch of UniFi;
 - And of course **it works**!
 
+> **NEW 2018-03-17**: We will soon publish versions for the 5.7 release of the Unifi Controller
+if you want to stick on the LTS branch, you should change your tag from `stable`
+to `lts`. We will publish in 2-3 weeks the 5.7 branch under the `stable` tag. Those
+of view wishing to stick with the 5.6 should update before that. We will publish instructions
+how to upgrade to **5.7** soon.
+
 > **WARNING**: in order to guarantee stability of the UID and GID. We are now
 creating a `unifi` dedicated user which will always have the UID 750 and its
 main group is also called `unifi` and has GID 750. When updating you will need
@@ -27,14 +33,14 @@ This project container image can be pulled from:
 
 ## Supported tags and respective `Dockerfile` links
 On **Docker Hub**:
-* [`latest`, `stable` (Dockerfile)](https://github.com/jcberthon/unifi-docker/blob/master/Dockerfile): currently unifi-5.6 branch
+* [`latest`, `stable`, `lts` (Dockerfile)](https://github.com/jcberthon/unifi-docker/blob/master/Dockerfile): currently unifi-5.6 branch
 * [`oldstable` (Dockerfile)](https://github.com/jcberthon/unifi-docker/blob/oldstable/Dockerfile): currently unifi-5.5 branch
 * You will find specific versions (as they build), e.g. `5.5.24` or `5.6.22` or etc.
 * And "branched versions" tag such as `5.5` and `5.6` which always point to the latest release within a branch (e.g. the most recent `5.6.x` release).
 * "Build" versions per release (e.g. `5.5.24-syyyyyyyy`), on GitHub/DockerHub I'm using the first 8 characters of the SHA1 commit ID. The purpose is when I'm changing my image definition but UniFi Controller release has not changed, I need to distinguish between the previous and newer image although both are `5.5.24` variants. So when a user picks one the "built" image he is sure to get the same image definition.
 
 On **GitLab Container Registry**:
-* [`latest`, `stable` (Dockerfile)](https://gitlab.com/huygens/unifi-docker/blob/master/Dockerfile): currently unifi-5.6 branch
+* [`latest`, `stable`, `lts` (Dockerfile)](https://gitlab.com/huygens/unifi-docker/blob/master/Dockerfile): currently unifi-5.6 branch
 * [`oldstable` (Dockerfile)](https://gitlab.com/huygens/unifi-docker/blob/oldstable/Dockerfile): currently unifi-5.5 branch
 * You will find specific versions (as they build), e.g. `5.5.24` or `5.6.22` or etc.
 * And "branched versions" tag such as `5.5` and `5.6` which always point to the latest release within a branch (e.g. the most recent `5.6.x` release).
