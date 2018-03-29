@@ -55,11 +55,13 @@ build:oldstable:amd64:
     - docker tag  "${CI_REGISTRY_IMAGE}/unifi:oldstable" "${CI_REGISTRY_IMAGE}/unifi:${VERSION_OLDSTABLE}-b${CI_PIPELINE_ID}"
     - docker tag  "${CI_REGISTRY_IMAGE}/unifi:oldstable" "${CI_REGISTRY_IMAGE}/unifi:${VERSION_OLDSTABLE}-s${SHA_COMMIT}"
     - docker tag  "${CI_REGISTRY_IMAGE}/unifi:oldstable" "${CI_REGISTRY_IMAGE}/unifi:${BRANCH_VERSION}"
+    - docker tag  "${CI_REGISTRY_IMAGE}/unifi:oldstable" "${CI_REGISTRY_IMAGE}/unifi:lts"
     - docker push "${CI_REGISTRY_IMAGE}/unifi:oldstable"
     - docker push "${CI_REGISTRY_IMAGE}/unifi:${VERSION_OLDSTABLE}"
     - docker push "${CI_REGISTRY_IMAGE}/unifi:${VERSION_OLDSTABLE}-b${CI_PIPELINE_ID}"
     - docker push "${CI_REGISTRY_IMAGE}/unifi:${VERSION_OLDSTABLE}-s${SHA_COMMIT}"
     - docker push "${CI_REGISTRY_IMAGE}/unifi:${BRANCH_VERSION}"
+    - docker push "${CI_REGISTRY_IMAGE}/unifi:lts"
     - docker rmi "${CI_REGISTRY_IMAGE}/unifi:oldstable" "${CI_REGISTRY_IMAGE}/unifi:${VERSION_OLDSTABLE}"
   tags:
     - docker
@@ -73,7 +75,7 @@ build:dev:amd64:
     - testing
   before_script:
     - apk add --no-cache curl gzip
-    - export VERSION_STABLE="$(./ci-get-unifi-version.sh stable)"
+    - export VERSION_STABLE="$(./ci-get-unifi-version.sh unifi-5.6)"
     - export BRANCH_VERSION="$(echo ${VERSION_STABLE} | cut -d. -f-2)"
     - docker login -u "gitlab-ci-token" -p "$CI_JOB_TOKEN" $CI_REGISTRY
   script:

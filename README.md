@@ -14,10 +14,18 @@ We have currently the following features to progress towards those goals:
 - We provide a `stable` tag, which follow the stable branch of UniFi;
 - And of course **it works**!
 
+> **NEW 2018-03-17**: We will soon publish versions for the 5.7 release of the Unifi Controller
+if you want to stick on the LTS branch, you should change your tag from `stable`
+to `lts`. We will publish in 2-3 weeks the 5.7 branch under the `stable` tag. Those
+of view wishing to stick with the 5.6 should update before that. We will publish instructions
+how to upgrade to **5.7** soon.
+
 > **WARNING**: in order to guarantee stability of the UID and GID. We are now
 creating a `unifi` dedicated user which will always have the UID 750 and its
 main group is also called `unifi` and has GID 750. When updating you will need
-to perform a change of ownership on your volumes (`chmod -R 750:750 ...`).
+to perform a change of ownership on your volumes (`chmod -R 750:750 ...`).  
+This feature is compatible with the new UniFi Controller 5.6 which supports
+a similar feature.
 
 This project container image can be pulled from:
 * [Docker Hub](https://hub.docker.com/r/jcberthon/unifi/): e.g. `docker pull jcberthon/unifi:stable`
@@ -25,25 +33,25 @@ This project container image can be pulled from:
 
 ## Supported tags and respective `Dockerfile` links
 On **Docker Hub**:
-* [`latest`, `stable` (Dockerfile)](https://github.com/jcberthon/unifi-docker/blob/master/Dockerfile): currently unifi-5.5 branch
-* [`oldstable` (Dockerfile)](https://github.com/jcberthon/unifi-docker/blob/oldstable/Dockerfile): currently unifi-5.4 branch
-* You will find specific versions (as they build), e.g. `5.5.20` or `5.4.19` or etc.
-* And "branched versions" tag such as `5.5`, `5.4` which always point to the latest release within a branch (e.g. the most recent `5.5.x` release).
-* "Build" versions per release (e.g. `5.5.20-syyyyyyyy`), on GitHub/DockerHub I'm using the first 8 characters of the SHA1 commit ID. The purpose is when I'm changing my image definition but UniFi Controller release has not changed, I need to distinguish between the previous and newer image although both are `5.5.20` variants. So when a user picks one the "built" image he is sure to get the same image definition.
+* [`latest`, `stable`, `lts` (Dockerfile)](https://github.com/jcberthon/unifi-docker/blob/master/Dockerfile): currently unifi-5.6 branch
+* [`oldstable` (Dockerfile)](https://github.com/jcberthon/unifi-docker/blob/oldstable/Dockerfile): currently unifi-5.5 branch
+* You will find specific versions (as they build), e.g. `5.5.24` or `5.6.22` or etc.
+* And "branched versions" tag such as `5.5` and `5.6` which always point to the latest release within a branch (e.g. the most recent `5.6.x` release).
+* "Build" versions per release (e.g. `5.5.24-syyyyyyyy`), on GitHub/DockerHub I'm using the first 8 characters of the SHA1 commit ID. The purpose is when I'm changing my image definition but UniFi Controller release has not changed, I need to distinguish between the previous and newer image although both are `5.5.24` variants. So when a user picks one the "built" image he is sure to get the same image definition.
 
 On **GitLab Container Registry**:
-* [`latest`, `stable` (Dockerfile)](https://gitlab.com/huygens/unifi-docker/blob/master/Dockerfile): currently unifi-5.5 branch
-* [`oldstable` (Dockerfile)](https://gitlab.com/huygens/unifi-docker/blob/oldstable/Dockerfile): currently unifi-5.4 branch
-* You will find specific versions (as they build), e.g. `5.5.20` or `5.4.19` or etc.
-* And "branched versions" tag such as `5.5`, `5.4` which always point to the latest release within a branch (e.g. the most recent `5.5.x` release).
-* "Build" versions per release (e.g. `5.5.20-bxxxx` or `5.5.20-syyyyyyyy`), on GitLab Registry I'm using the Build ID of the CI Pipeline and the first 8 characters of the SHA1 commit ID (see above for details). So for each new build of the same release, you get a different Build ID even if there was no new commit (but the underlying base image could have changed).
+* [`latest`, `stable`, `lts` (Dockerfile)](https://gitlab.com/huygens/unifi-docker/blob/master/Dockerfile): currently unifi-5.6 branch
+* [`oldstable` (Dockerfile)](https://gitlab.com/huygens/unifi-docker/blob/oldstable/Dockerfile): currently unifi-5.5 branch
+* You will find specific versions (as they build), e.g. `5.5.24` or `5.6.22` or etc.
+* And "branched versions" tag such as `5.5` and `5.6` which always point to the latest release within a branch (e.g. the most recent `5.6.x` release).
+* "Build" versions per release (e.g. `5.5.24-bxxxx` or `5.5.24-syyyyyyyy`), on GitLab Registry I'm using the Build ID of the CI Pipeline and the first 8 characters of the SHA1 commit ID (see above for details). So for each new build of the same release, you get a different Build ID even if there was no new commit (but the underlying base image could have changed).
 
 My recommendation is to either stick to a "rolling tag" (e.g. `stable`) or to pick one of the build tag (for better repeatability, e.g. `5.5.20-b11594497` or `5.5.20-s4255dc00`).
 
 ## Description
 
 This is a containerized version of [Ubiquiti Network](https://www.ubnt.com/)'s
-UniFi Controller (current stable is version 5.5 branch).
+UniFi Controller (current stable is version 5.6 branch).
 
 Use `docker run --net=host -d jcberthon/unifi`
 to run it using your host network stack and with default user settings (usually
@@ -170,16 +178,16 @@ resource limits you will give the container (e.g. if you use the `--cpus 2.0` or
 `--memory 2048m`). Our current approach is that the JVM process could use up to
 half of the container allowed max memory, the other half can be used by the MongoDB
 database. Not that for a home usage (one AP and one switch), the memory usage of
-the container did not exceed 600MB with the current 5.5 branch.
+the container did not exceed 600MB with the current 5.6 branch.
 
 I haven't tried running it on devices with less than 1GB. But on devices with 1GB
 of RAM or less, you should make sure that the Java process can allocate up to 512MB
 heap. This means, you will need to set the maximum heap size manually to 512.
 
 In addition, it is recommended to limit the memory of the complete container. E.g.
-if you have 1GB RAM, limit the memory to 768MB so your system (kernel, etc.) 
-always so breathing room. And with this setting, there is still enough memory
-for MongoDB.
+if you have 1GB RAM, limit the memory to 768MB so your system (kernel, etc.)
+always have some breathing room. And with this setting, there is still enough
+memory for MongoDB.
 
 Example with limits to 768MB memory:
 
@@ -281,7 +289,7 @@ In addition, I use the [Debian/Ubuntu APT repository from UniFi](https://help.ub
 instead of downloading individual packages, this avoids changing the Dockerfile
 for each new release from UniFi. I simply need to rebuild my image. In addition,
 Ubiquiti is using "rolling updates" so that by using the "stable" branch you get
-always the latest stable release (was 5.4.x when I started, is now 5.5.x at time
+always the latest stable release (was 5.4.x when I started, is now 5.6.x at time
 of edition)
 
 Finally the last change is about security, I'm dropping every possible privileges,
