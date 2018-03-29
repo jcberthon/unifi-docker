@@ -29,12 +29,11 @@ function ci-get-unifi-version {
 SHA_COMMIT="$(echo ${GIT_SHA1} | cut -b-8)"
 
 if [[ "${SOURCE_BRANCH}" == "master" ]]; then
-  CHANNEL_NAME="unifi-5.6"
+  CHANNEL_NAME="stable"
   CHANNEL_VERSION="$(ci-get-unifi-version ${CHANNEL_NAME} amd64)"
   CHANNEL_SHORT_VERSION="$(echo ${CHANNEL_VERSION} | cut -d. -f-2)"
 
   tag_branch "latest"
-  tag_branch "lts"
   tag_branch "${CHANNEL_VERSION}"
   tag_branch "${CHANNEL_VERSION}-s${SHA_COMMIT}"
   tag_branch "${CHANNEL_SHORT_VERSION}"
@@ -42,6 +41,7 @@ elif [[ "${SOURCE_BRANCH}" == "oldstable" ]]; then
   CHANNEL_VERSION="$(ci-get-unifi-version ${SOURCE_BRANCH} amd64)"
   CHANNEL_SHORT_VERSION="$(echo ${CHANNEL_VERSION} | cut -d. -f-2)"
 
+  tag_branch "lts"
   tag_branch "${CHANNEL_VERSION}"
   tag_branch "${CHANNEL_VERSION}-s${SHA_COMMIT}"
   tag_branch "${CHANNEL_SHORT_VERSION}"
