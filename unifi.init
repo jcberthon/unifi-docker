@@ -1,0 +1,82 @@
+#!/bin/bash
+# Startup script for Ubiquiti UniFi
+
+set -ex
+
+NAME="unifi"
+
+BASEDIR="/usr/lib/unifi"
+MAINCLASS="com.ubnt.ace.Launcher"
+
+PATH=/bin:/usr/bin:/sbin:/usr/sbin
+
+MONGOPORT=27117
+
+JAVA_ENTROPY_GATHER_DEVICE=
+JVM_MAX_HEAP_SIZE=1024M
+JVM_INIT_HEAP_SIZE=
+UNIFI_JVM_EXTRA_OPTS=
+
+ENABLE_UNIFI=yes
+JVM_EXTRA_OPTS=
+JSVC_EXTRA_OPTS=
+[ -f "/etc/default/${NAME}" ] && . "/etc/default/${NAME}"
+
+[ "x${ENABLE_UNIFI}" != "xyes" ] && exit 0
+
+DATADIR=${UNIFI_DATA_DIR:-/var/lib/${NAME}}
+LOGDIR=${UNIFI_LOG_DIR:-/var/log/${NAME}}
+RUNDIR=${UNIFI_RUN_DIR:-/var/run/${NAME}}
+
+JVM_EXTRA_OPTS="${JVM_EXTRA_OPTS} -Dunifi.datadir=${DATADIR} -Dunifi.logdir=${LOGDIR} -Dunifi.rundir=${RUNDIR}"
+PIDFILE="/var/run/unifi/${NAME}.pid"
+
+if [ ! -z "${JAVA_ENTROPY_GATHER_DEVICE}" ]; then
+	JVM_EXTRA_OPTS="${JVM_EXTRA_OPTS} -Djava.security.egd=${JAVA_ENTROPY_GATHER_DEVICE}"
+fi
+
+if [ ! -z "${JVM_MAX_HEAP_SIZE}" ]; then
+	JVM_EXTRA_OPTS="${JVM_EXTRA_OPTS} -Xmx${JVM_MAX_HEAP_SIZE}"
+fi
+
+if [ ! -z "${JVM_INIT_HEAP_SIZE}" ]; then
+	JVM_EXTRA_OPTS="${JVM_EXTRA_OPTS} -Xms${JVM_INIT_HEAP_SIZE}"
+fi
+
+if [ ! -z "${UNIFI_JVM_EXTRA_OPTS}" ]; then
+	JVM_EXTRA_OPTS="${JVM_EXTRA_OPTS} ${UNIFI_JVM_EXTRA_OPTS}"
+fi
+
+JVM_OPTS="${JVM_EXTRA_OPTS} -Djava.awt.headless=true -Dfile.encoding=UTF-8"
+
+[ "x${JAVA_HOME}" != "x" ] || set_java_home
+
+UNIFI_USER=${UNIFI_USER:-unifi}
+
+MONGOLOCK="${DATADIR}/db/mongod.lock"
+
+UNIFI_UID=$(id -u "${UNIFI_USER}")
+DATADIR_UID=$(stat "${DATADIR}" -Lc %u)
+if [ ${UNIFI_UID} -ne ${DATADIR_UID} ]; then
+	msg="${NAME} cannot start. Please create ${UNIFI_USER} user, and chown -R ${UNIFI_USER} ${DATADIR} ${LOGDIR} ${RUNDIR}"
+	echo "$msg" >&2
+	exit 1
+fi
+
+JSVC_OPTS="${JSVC_OPTS}\
+ -home ${JAVA_HOME} \
+ -cwd ${BASEDIR} \
+ -cp /usr/share/java/commons-daemon.jar:${BASEDIR}/lib/ace.jar \
+ -pidfile ${PIDFILE} \
+ -procname ${NAME} \
+ -outfile /dev/stdout \
+ -errfile /dev/stderr \
+ ${JSVC_EXTRA_OPTS} \
+ ${JVM_OPTS}"
+
+cd ${BASEDIR}
+
+echo "Starting ${NAME}"
+/usr/bin/jsvc ${JSVC_OPTS} ${MAINCLASS} start
+
+exit 0

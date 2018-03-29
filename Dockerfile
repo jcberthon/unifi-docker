@@ -43,6 +43,7 @@ RUN groupadd -g 750 -o unifi \
 EXPOSE 6789/tcp 8080/tcp 8443/tcp 8880/tcp 8843/tcp 3478/udp 10001/udp
 
 COPY unifi.default /etc/default/unifi
+COPY unifi.init /usr/lib/unifi/bin/unifi.init
 
 # Enable running Unifi Controller as a standard user
 # It requires that we create certain folders and links first
@@ -65,4 +66,3 @@ VOLUME ["/var/lib/unifi", "/var/log/unifi"]
 # was launched by the Unifi application. Therefore mongod was not shutdown
 # cleanly.
 ENTRYPOINT ["/sbin/tini", "-g", "--", "/usr/lib/unifi/bin/unifi.init"]
-CMD ["start"]
