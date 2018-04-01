@@ -37,13 +37,8 @@ We have currently the following features to progress towards those goals:
 - We provide instructions so you do not need to use the host network;
 - We have weekly rebuild, so the full stack (from base image to UniFi Controller package);
 - We provide a `stable` tag, which follow the stable branch of UniFi;
+- We usually have the UniFi Controller tested internally before it is published here;
 - And of course **it works**!
-
-> **NEW 2018-03-17**: We will soon publish versions for the 5.7 release of the Unifi Controller
-if you want to stick on the LTS branch, you should change your tag from `stable`
-to `lts`. We will publish in 2-3 weeks the 5.7 branch under the `stable` tag. Those
-of view wishing to stick with the 5.6 should update before that. We will publish instructions
-how to upgrade to **5.7** soon.
 
 > **WARNING**: in order to guarantee stability of the UID and GID. We are now
 creating a `unifi` dedicated user which will always have the UID 750 and its
@@ -59,19 +54,18 @@ This project container image can be pulled from:
 ## Description
 
 This is a containerized version of [Ubiquiti Network](https://www.ubnt.com/)'s
-UniFi Controller (current stable is version 5.6 branch).
+UniFi Controller (current LTS is version 5.6 branch).
 
-Use `docker run --net=host -d jcberthon/unifi`
-to run it using your host network stack and with default user settings (usually
-this is `root` unless you configured user namespaces), but you might want to do
-better than that see below.
+Use `docker run --net=host -d jcberthon/unifi` to run it using your host network
+stack and with default user settings (usually this is `root` unless you
+configured user namespaces), but you might want to do better than that see below.
 
 The following options may be of use:
 
 - Set the timezone with `TZ`
 - Use volumes to persist application data: the `data` and `log` volumes
 
-Here are a few examples to test with (or simply use the docker-compose.yml file
+Here are a few examples to test with (or simply use the `docker-compose.yml` file
 in the repository).
 
 > *Note: the following examples set permissions on the volumes so that the
@@ -128,13 +122,16 @@ have limited security risk.
 
 When upgrading to newer version (e.g. going from the 5.6 to 5.7 branch) it is
 good practice to perform a backup before. You can use the UniFi Controller app
-to perform such a backup (under Settings -> Maintenance). Make sure your backup
-is handy, potentially create a new container on a different host and try to
-restore the backup to make sure it works.
+to perform such a backup (under Settings -> Maintenance and click the
+"Download Backup" button). Make sure your backup is handy, potentially create a
+new container on a different host and try to restore the backup to make sure it
+works.
 
 Then simply stop and delete the previous container and respawn a new container
 with the updated Docker image. If you are using docker-compose, you can update
-the image tag and simply do `docker-compose up --pull -d`.
+the image tag and simply do `docker-compose up --pull -d` this will pull a newer
+image if any, and recreate the container using that image (so it will stop, remove,
+create and start the container).
 
 ## Volumes:
 
@@ -171,7 +168,10 @@ $ docker run --rm --cap-drop ALL -e TZ='Europe/Berlin' \
 The ports which are not exposed by the container image are marked as such. When
 not specified, assume the port is exposed.
 
-- `3478/udp`: STUN service (for NAT traversal - WebRTC, SIP, etc.) - I think it is used only when you use the "cloud" part of the controller, then it uses WebRTC to communicate. I don't use that, so I don't map that port and it is working fine.
+- `3478/udp`: STUN service (for NAT traversal - WebRTC, SIP, etc.) - I'm not sure
+  for which purpose exactly Ubiquiti uses that service, but it seems that one needs
+  it (at least for switches) to display some information about the managed devices
+  (e.g. on switches it can display in pseudo-real time the status of the ports).
 - `5656-5699/udp`: Used for UPA-EDU (not exposed)
 - `6789/tcp`: Speed Test (unifi5 only)
 - `8080/tcp`: Device command/control (API)
@@ -185,7 +185,9 @@ not specified, assume the port is exposed.
 - `54123/udp`: ???
 
 A container should at least redirect port 8443/tcp and port 8843/tcp (if usage of
-guest network is required).
+guest network is required). Also check the `docker-compose.yml` file in this
+repository for a list of useful ports to map in order to have a functional
+UniFi Controller.
 
 See [UniFi - Ports Used](https://help.ubnt.com/hc/en-us/articles/218506997-UniFi-Ports-Used)
 
@@ -239,7 +241,7 @@ database, along the 3 Java processes which makes the controller. Therefore we
 needed a very lightweight sort of init system. As with the official
 init script provided by Ubiquiti, we use a modify/adapted version which makes
 also use of `jsvc` which provides signal handling and multi-process spawning and
-watching. But with our version of the startup script, we can ensure that 
+watching. But with our version of the startup script, we can ensure that
 **all services can run as a non-privilege user**.
 
 Our solution originally relied on the Docker-provided `init` daemon (triggered
