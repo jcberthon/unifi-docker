@@ -1,5 +1,30 @@
 # UniFi Controller in a Box - Docker Edition
 
+
+## Supported tags and respective `Dockerfile` links
+On **Docker Hub**:
+* [`latest`, `stable` (Dockerfile)](https://github.com/jcberthon/unifi-docker/blob/master/Dockerfile): currently unifi-5.7 branch
+* [`lts`, `oldstable` (Dockerfile)](https://github.com/jcberthon/unifi-docker/blob/oldstable/Dockerfile): currently unifi-5.6 branch
+* You will find specific versions (as they build), e.g. `5.5.24` or `5.6.22` or etc.
+* And "branched versions" tag such as `5.5` and `5.6` which always point to the latest release within a branch (e.g. the most recent `5.6.x` release).
+* "Build" versions per release (e.g. `5.5.24-syyyyyyyy`), on GitHub/DockerHub I'm using the first 8 characters of the SHA1 commit ID. The purpose is when I'm changing my image definition but UniFi Controller release has not changed, I need to distinguish between the previous and newer image although both are `5.5.24` variants. So when a user picks one the "built" image he is sure to get the same image definition.
+
+On **GitLab Container Registry**:
+* [`latest`, `stable` (Dockerfile)](https://gitlab.com/huygens/unifi-docker/blob/master/Dockerfile): currently unifi-5.7 branch
+* [`lts`, `oldstable` (Dockerfile)](https://gitlab.com/huygens/unifi-docker/blob/oldstable/Dockerfile): currently unifi-5.6 branch
+* You will find specific versions (as they build), e.g. `5.5.24` or `5.6.22` or etc.
+* And "branched versions" tag such as `5.5` and `5.6` which always point to the latest release within a branch (e.g. the most recent `5.6.x` release).
+* "Build" versions per release (e.g. `5.5.24-bxxxx` or `5.5.24-syyyyyyyy`), on GitLab Registry I'm using the Build ID of the CI Pipeline and the first 8 characters of the SHA1 commit ID (see above for details). So for each new build of the same release, you get a different Build ID even if there was no new commit (but the underlying base image could have changed).
+
+My recommendation is to either stick to a "rolling tag" (e.g. `lts` or `stable`)
+or to pick one of the build tag (for better repeatability, e.g. `5.5.20-b11594497`
+or `5.5.20-s4255dc00`).  
+In any case it is recommended to activate scheduled backup in your UniFi Controller
+so that if you automatically upgrade when using a rolling tag, you always have a
+backup file to revert if things get broken.
+
+## Project Presentation
+
 This project has for purpose to run the UniFi Controller inside a Docker
 container with the following principles:
 - Minimum privilege basis, we expose or need what's required
@@ -30,23 +55,6 @@ a similar feature.
 This project container image can be pulled from:
 * [Docker Hub](https://hub.docker.com/r/jcberthon/unifi/): e.g. `docker pull jcberthon/unifi:stable`
 * [GitLab Registry](https://gitlab.com/huygens/unifi-docker/container_registry): e.g. `docker pull registry.gitlab.com/huygens/unifi-docker/unifi:stable`
-
-## Supported tags and respective `Dockerfile` links
-On **Docker Hub**:
-* [`latest`, `stable`, `lts` (Dockerfile)](https://github.com/jcberthon/unifi-docker/blob/master/Dockerfile): currently unifi-5.6 branch
-* [`oldstable` (Dockerfile)](https://github.com/jcberthon/unifi-docker/blob/oldstable/Dockerfile): currently unifi-5.5 branch
-* You will find specific versions (as they build), e.g. `5.5.24` or `5.6.22` or etc.
-* And "branched versions" tag such as `5.5` and `5.6` which always point to the latest release within a branch (e.g. the most recent `5.6.x` release).
-* "Build" versions per release (e.g. `5.5.24-syyyyyyyy`), on GitHub/DockerHub I'm using the first 8 characters of the SHA1 commit ID. The purpose is when I'm changing my image definition but UniFi Controller release has not changed, I need to distinguish between the previous and newer image although both are `5.5.24` variants. So when a user picks one the "built" image he is sure to get the same image definition.
-
-On **GitLab Container Registry**:
-* [`latest`, `stable`, `lts` (Dockerfile)](https://gitlab.com/huygens/unifi-docker/blob/master/Dockerfile): currently unifi-5.6 branch
-* [`oldstable` (Dockerfile)](https://gitlab.com/huygens/unifi-docker/blob/oldstable/Dockerfile): currently unifi-5.5 branch
-* You will find specific versions (as they build), e.g. `5.5.24` or `5.6.22` or etc.
-* And "branched versions" tag such as `5.5` and `5.6` which always point to the latest release within a branch (e.g. the most recent `5.6.x` release).
-* "Build" versions per release (e.g. `5.5.24-bxxxx` or `5.5.24-syyyyyyyy`), on GitLab Registry I'm using the Build ID of the CI Pipeline and the first 8 characters of the SHA1 commit ID (see above for details). So for each new build of the same release, you get a different Build ID even if there was no new commit (but the underlying base image could have changed).
-
-My recommendation is to either stick to a "rolling tag" (e.g. `stable`) or to pick one of the build tag (for better repeatability, e.g. `5.5.20-b11594497` or `5.5.20-s4255dc00`).
 
 ## Description
 
@@ -115,6 +123,18 @@ network stack and your container. It is not bad, it is like if you were running
 the UniFi services directly on the host without Docker. Anyway, by default this
 container will run as a non-root user, so you could still use that option and
 have limited security risk.
+
+## Upgrading to newer version
+
+When upgrading to newer version (e.g. going from the 5.6 to 5.7 branch) it is
+good practice to perform a backup before. You can use the UniFi Controller app
+to perform such a backup (under Settings -> Maintenance). Make sure your backup
+is handy, potentially create a new container on a different host and try to
+restore the backup to make sure it works.
+
+Then simply stop and delete the previous container and respawn a new container
+with the updated Docker image. If you are using docker-compose, you can update
+the image tag and simply do `docker-compose up --pull -d`.
 
 ## Volumes:
 
@@ -216,10 +236,11 @@ Our approach does not strictly follows Docker best practices with respect to
 micro-services and running one process per container. Our container includes
 everything the UniFi controller needs, it has notably an embedded MongoDB
 database, along the 3 Java processes which makes the controller. Therefore we
-needed a very lightweight sort of init system. We actually run the official
-init script provided by Ubiquiti which make use of `jsvc` which provides signal
-handling and multi-process spawning and watching. **All services can run as a
-non-privilege user.**
+needed a very lightweight sort of init system. As with the official
+init script provided by Ubiquiti, we use a modify/adapted version which makes
+also use of `jsvc` which provides signal handling and multi-process spawning and
+watching. But with our version of the startup script, we can ensure that 
+**all services can run as a non-privilege user**.
 
 Our solution originally relied on the Docker-provided `init` daemon (triggered
 using `--init`) which provides proper signal handling (catching of SIGTERM, and
