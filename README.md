@@ -1,5 +1,30 @@
 # UniFi Controller in a Box - Docker Edition
 
+
+## Supported tags and respective `Dockerfile` links
+On **Docker Hub**:
+* [`latest`, `stable` (Dockerfile)](https://github.com/jcberthon/unifi-docker/blob/master/Dockerfile): currently unifi-5.7 branch
+* [`lts`, `oldstable` (Dockerfile)](https://github.com/jcberthon/unifi-docker/blob/oldstable/Dockerfile): currently unifi-5.6 branch
+* You will find specific versions (as they build), e.g. `5.5.24` or `5.6.22` or etc.
+* And "branched versions" tag such as `5.5` and `5.6` which always point to the latest release within a branch (e.g. the most recent `5.6.x` release).
+* "Build" versions per release (e.g. `5.5.24-syyyyyyyy`), on GitHub/DockerHub I'm using the first 8 characters of the SHA1 commit ID. The purpose is when I'm changing my image definition but UniFi Controller release has not changed, I need to distinguish between the previous and newer image although both are `5.5.24` variants. So when a user picks one the "built" image he is sure to get the same image definition.
+
+On **GitLab Container Registry**:
+* [`latest`, `stable` (Dockerfile)](https://gitlab.com/huygens/unifi-docker/blob/master/Dockerfile): currently unifi-5.7 branch
+* [`lts`, `oldstable` (Dockerfile)](https://gitlab.com/huygens/unifi-docker/blob/oldstable/Dockerfile): currently unifi-5.6 branch
+* You will find specific versions (as they build), e.g. `5.5.24` or `5.6.22` or etc.
+* And "branched versions" tag such as `5.5` and `5.6` which always point to the latest release within a branch (e.g. the most recent `5.6.x` release).
+* "Build" versions per release (e.g. `5.5.24-bxxxx` or `5.5.24-syyyyyyyy`), on GitLab Registry I'm using the Build ID of the CI Pipeline and the first 8 characters of the SHA1 commit ID (see above for details). So for each new build of the same release, you get a different Build ID even if there was no new commit (but the underlying base image could have changed).
+
+My recommendation is to either stick to a "rolling tag" (e.g. `lts` or `stable`)
+or to pick one of the build tag (for better repeatability, e.g. `5.5.20-b11594497`
+or `5.5.20-s4255dc00`).  
+In any case it is recommended to activate scheduled backup in your UniFi Controller
+so that if you automatically upgrade when using a rolling tag, you always have a
+backup file to revert if things get broken.
+
+## Project Presentation
+
 This project has for purpose to run the UniFi Controller inside a Docker
 container with the following principles:
 - Minimum privilege basis, we expose or need what's required
@@ -12,13 +37,8 @@ We have currently the following features to progress towards those goals:
 - We provide instructions so you do not need to use the host network;
 - We have weekly rebuild, so the full stack (from base image to UniFi Controller package);
 - We provide a `stable` tag, which follow the stable branch of UniFi;
+- We usually have the UniFi Controller tested internally before it is published here;
 - And of course **it works**!
-
-> **NEW 2018-03-17**: We will soon publish versions for the 5.7 release of the Unifi Controller
-if you want to stick on the LTS branch, you should change your tag from `stable`
-to `lts`. We will publish in 2-3 weeks the 5.7 branch under the `stable` tag. Those
-of view wishing to stick with the 5.6 should update before that. We will publish instructions
-how to upgrade to **5.7** soon.
 
 > **WARNING**: in order to guarantee stability of the UID and GID. We are now
 creating a `unifi` dedicated user which will always have the UID 750 and its
@@ -31,39 +51,21 @@ This project container image can be pulled from:
 * [Docker Hub](https://hub.docker.com/r/jcberthon/unifi/): e.g. `docker pull jcberthon/unifi:stable`
 * [GitLab Registry](https://gitlab.com/huygens/unifi-docker/container_registry): e.g. `docker pull registry.gitlab.com/huygens/unifi-docker/unifi:stable`
 
-## Supported tags and respective `Dockerfile` links
-On **Docker Hub**:
-* [`latest`, `stable`, `lts` (Dockerfile)](https://github.com/jcberthon/unifi-docker/blob/master/Dockerfile): currently unifi-5.6 branch
-* [`oldstable` (Dockerfile)](https://github.com/jcberthon/unifi-docker/blob/oldstable/Dockerfile): currently unifi-5.5 branch
-* You will find specific versions (as they build), e.g. `5.5.24` or `5.6.22` or etc.
-* And "branched versions" tag such as `5.5` and `5.6` which always point to the latest release within a branch (e.g. the most recent `5.6.x` release).
-* "Build" versions per release (e.g. `5.5.24-syyyyyyyy`), on GitHub/DockerHub I'm using the first 8 characters of the SHA1 commit ID. The purpose is when I'm changing my image definition but UniFi Controller release has not changed, I need to distinguish between the previous and newer image although both are `5.5.24` variants. So when a user picks one the "built" image he is sure to get the same image definition.
-
-On **GitLab Container Registry**:
-* [`latest`, `stable`, `lts` (Dockerfile)](https://gitlab.com/huygens/unifi-docker/blob/master/Dockerfile): currently unifi-5.6 branch
-* [`oldstable` (Dockerfile)](https://gitlab.com/huygens/unifi-docker/blob/oldstable/Dockerfile): currently unifi-5.5 branch
-* You will find specific versions (as they build), e.g. `5.5.24` or `5.6.22` or etc.
-* And "branched versions" tag such as `5.5` and `5.6` which always point to the latest release within a branch (e.g. the most recent `5.6.x` release).
-* "Build" versions per release (e.g. `5.5.24-bxxxx` or `5.5.24-syyyyyyyy`), on GitLab Registry I'm using the Build ID of the CI Pipeline and the first 8 characters of the SHA1 commit ID (see above for details). So for each new build of the same release, you get a different Build ID even if there was no new commit (but the underlying base image could have changed).
-
-My recommendation is to either stick to a "rolling tag" (e.g. `stable`) or to pick one of the build tag (for better repeatability, e.g. `5.5.20-b11594497` or `5.5.20-s4255dc00`).
-
 ## Description
 
 This is a containerized version of [Ubiquiti Network](https://www.ubnt.com/)'s
-UniFi Controller (current stable is version 5.6 branch).
+UniFi Controller (current LTS is version 5.6 branch).
 
-Use `docker run --net=host -d jcberthon/unifi`
-to run it using your host network stack and with default user settings (usually
-this is `root` unless you configured user namespaces), but you might want to do
-better than that see below.
+Use `docker run --net=host -d jcberthon/unifi` to run it using your host network
+stack and with default user settings (usually this is `root` unless you
+configured user namespaces), but you might want to do better than that see below.
 
 The following options may be of use:
 
 - Set the timezone with `TZ`
 - Use volumes to persist application data: the `data` and `log` volumes
 
-Here are a few examples to test with (or simply use the docker-compose.yml file
+Here are a few examples to test with (or simply use the `docker-compose.yml` file
 in the repository).
 
 > *Note: the following examples set permissions on the volumes so that the
@@ -116,6 +118,21 @@ the UniFi services directly on the host without Docker. Anyway, by default this
 container will run as a non-root user, so you could still use that option and
 have limited security risk.
 
+## Upgrading to newer version
+
+When upgrading to newer version (e.g. going from the 5.6 to 5.7 branch) it is
+good practice to perform a backup before. You can use the UniFi Controller app
+to perform such a backup (under Settings -> Maintenance and click the
+"Download Backup" button). Make sure your backup is handy, potentially create a
+new container on a different host and try to restore the backup to make sure it
+works.
+
+Then simply stop and delete the previous container and respawn a new container
+with the updated Docker image. If you are using docker-compose, you can update
+the image tag and simply do `docker-compose up --pull -d` this will pull a newer
+image if any, and recreate the container using that image (so it will stop, remove,
+create and start the container).
+
 ## Volumes:
 
 - `/var/lib/unifi`: Configuration data (e.g. `system.properties`)
@@ -151,7 +168,10 @@ $ docker run --rm --cap-drop ALL -e TZ='Europe/Berlin' \
 The ports which are not exposed by the container image are marked as such. When
 not specified, assume the port is exposed.
 
-- `3478/udp`: STUN service (for NAT traversal - WebRTC, SIP, etc.) - I think it is used only when you use the "cloud" part of the controller, then it uses WebRTC to communicate. I don't use that, so I don't map that port and it is working fine.
+- `3478/udp`: STUN service (for NAT traversal - WebRTC, SIP, etc.) - I'm not sure
+  for which purpose exactly Ubiquiti uses that service, but it seems that one needs
+  it (at least for switches) to display some information about the managed devices
+  (e.g. on switches it can display in pseudo-real time the status of the ports).
 - `5656-5699/udp`: Used for UPA-EDU (not exposed)
 - `6789/tcp`: Speed Test (unifi5 only)
 - `8080/tcp`: Device command/control (API)
@@ -165,7 +185,9 @@ not specified, assume the port is exposed.
 - `54123/udp`: ???
 
 A container should at least redirect port 8443/tcp and port 8843/tcp (if usage of
-guest network is required).
+guest network is required). Also check the `docker-compose.yml` file in this
+repository for a list of useful ports to map in order to have a functional
+UniFi Controller.
 
 See [UniFi - Ports Used](https://help.ubnt.com/hc/en-us/articles/218506997-UniFi-Ports-Used)
 
@@ -216,10 +238,11 @@ Our approach does not strictly follows Docker best practices with respect to
 micro-services and running one process per container. Our container includes
 everything the UniFi controller needs, it has notably an embedded MongoDB
 database, along the 3 Java processes which makes the controller. Therefore we
-needed a very lightweight sort of init system. We actually run the official
-init script provided by Ubiquiti which make use of `jsvc` which provides signal
-handling and multi-process spawning and watching. **All services can run as a
-non-privilege user.**
+needed a very lightweight sort of init system. The official init script provided
+by Ubiquiti provides some signal handling and process watching (restarting on exit,
+etc.). These features are slightly redundant to what Docker can do so we do not reuse
+their technic but use what Docker provides natively. With our version of the startup
+script, we can ensure that **all services can run as a non-privilege user**.
 
 Our solution originally relied on the Docker-provided `init` daemon (triggered
 using `--init`) which provides proper signal handling (catching of SIGTERM, and
@@ -273,7 +296,6 @@ The possible parameters can be (they are described in the unifi.default file in 
 * `JVM_INIT_HEAP_SIZE`: minimum JVM heap size (on startup), usually not needed
 * `UNIFI_JVM_EXTRA_OPTS`: additional JVM parameters can be added here
 * `ENABLE_UNIFI`: boolean ('yes' or 'no') leave it to 'yes' or unset, as you want the UniFi Controller to run
-* `JSVC_EXTRA_OPTS`: jsvc(the Java as a service command), this option should contain at least "-nodetach"
 
 ## Changelog
 
