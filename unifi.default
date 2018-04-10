@@ -62,10 +62,3 @@ UNIFI_JVM_EXTRA_OPTS="-XX:MaxRAMFraction=2 -XX:+UnlockExperimentalVMOptions -XX:
 # Values are 'yes' or 'no'.
 # Default value: ENABLE_UNIFI=yes
 # ENABLE_UNIFI=yes
-
-# JSVC_EXTRA_OPTS
-# Specific options for the jsvc command (used to run Java apps as a service)
-# See the jsvc man page (e.g. https://linux.die.net/man/1/jsvc) for possible
-# options
-# Default value: JSVC_EXTRA_OPTS=
-JSVC_EXTRA_OPTS="-nodetach -keepstdin"
