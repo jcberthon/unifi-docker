@@ -238,11 +238,11 @@ Our approach does not strictly follows Docker best practices with respect to
 micro-services and running one process per container. Our container includes
 everything the UniFi controller needs, it has notably an embedded MongoDB
 database, along the 3 Java processes which makes the controller. Therefore we
-needed a very lightweight sort of init system. As with the official
-init script provided by Ubiquiti, we use a modify/adapted version which makes
-also use of `jsvc` which provides signal handling and multi-process spawning and
-watching. But with our version of the startup script, we can ensure that
-**all services can run as a non-privilege user**.
+needed a very lightweight sort of init system. The official init script provided
+by Ubiquiti provides some signal handling and process watching (restarting on exit,
+etc.). These features are slightly redundant to what Docker can do so we do not reuse
+their technic but use what Docker provides natively. With our version of the startup
+script, we can ensure that **all services can run as a non-privilege user**.
 
 Our solution originally relied on the Docker-provided `init` daemon (triggered
 using `--init`) which provides proper signal handling (catching of SIGTERM, and
@@ -296,7 +296,6 @@ The possible parameters can be (they are described in the unifi.default file in 
 * `JVM_INIT_HEAP_SIZE`: minimum JVM heap size (on startup), usually not needed
 * `UNIFI_JVM_EXTRA_OPTS`: additional JVM parameters can be added here
 * `ENABLE_UNIFI`: boolean ('yes' or 'no') leave it to 'yes' or unset, as you want the UniFi Controller to run
-* `JSVC_EXTRA_OPTS`: jsvc(the Java as a service command), this option should contain at least "-nodetach"
 
 ## Changelog
 
