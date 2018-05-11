@@ -53,6 +53,7 @@ RUN mkdir -p -m 755 /var/lib/unifi /var/log/unifi /var/run/unifi /usr/lib/unifi/
     && ln -sf /var/log/unifi /usr/lib/unifi/logs \
     && ln -sf /var/run/unifi /usr/lib/unifi/run \
     && chown unifi:unifi /var/lib/unifi /var/log/unifi /var/run/unifi /usr/lib/unifi/work
+    && chmod 755 /usr/lib/unifi/bin/unifi.init
 USER unifi
 
 # Add healthcheck (requires Docker 1.12)
