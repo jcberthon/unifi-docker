@@ -1,20 +1,20 @@
-# UniFi Controller in a Box - Docker Edition
+# UniFi Network Controller in a Box - Docker Edition
 
 
 ## Supported tags and respective `Dockerfile` links
 On **Docker Hub**:
-* [`latest`, `stable` (Dockerfile)](https://github.com/jcberthon/unifi-docker/blob/master/Dockerfile): currently unifi-5.7 branch
+* [`latest`, `stable` (Dockerfile)](https://github.com/jcberthon/unifi-docker/blob/master/Dockerfile): currently unifi-5.10 branch
 * [`lts`, `oldstable` (Dockerfile)](https://github.com/jcberthon/unifi-docker/blob/oldstable/Dockerfile): currently unifi-5.6 branch
-* You will find specific versions (as they build), e.g. `5.5.24` or `5.6.22` or etc.
-* And "branched versions" tag such as `5.5` and `5.6` which always point to the latest release within a branch (e.g. the most recent `5.6.x` release).
-* "Build" versions per release (e.g. `5.5.24-syyyyyyyy`), on GitHub/DockerHub I'm using the first 8 characters of the SHA1 commit ID. The purpose is when I'm changing my image definition but UniFi Controller release has not changed, I need to distinguish between the previous and newer image although both are `5.5.24` variants. So when a user picks one the "built" image he is sure to get the same image definition.
+* You will find specific versions (as they build), e.g. `5.6.39` or `5.10.19` or etc.
+* And "branched versions" tag such as `5.6` and `5.10` which always point to the latest release within a branch (e.g. the most recent `5.10.x` release).
+* "Build" versions per release (e.g. `5.6.39-syyyyyyyy`), on GitHub/DockerHub I'm using the first 8 characters of the SHA1 commit ID. The purpose is when I'm changing my image definition but UniFi Controller release has not changed, I need to distinguish between the previous and newer image although both are `5.6.39` variants. So when a user picks one the "built" image he is sure to get the same image definition.
 
 On **GitLab Container Registry**:
-* [`latest`, `stable` (Dockerfile)](https://gitlab.com/huygens/unifi-docker/blob/master/Dockerfile): currently unifi-5.7 branch
+* [`latest`, `stable` (Dockerfile)](https://gitlab.com/huygens/unifi-docker/blob/master/Dockerfile): currently unifi-5.10 branch
 * [`lts`, `oldstable` (Dockerfile)](https://gitlab.com/huygens/unifi-docker/blob/oldstable/Dockerfile): currently unifi-5.6 branch
-* You will find specific versions (as they build), e.g. `5.5.24` or `5.6.22` or etc.
-* And "branched versions" tag such as `5.5` and `5.6` which always point to the latest release within a branch (e.g. the most recent `5.6.x` release).
-* "Build" versions per release (e.g. `5.5.24-bxxxx` or `5.5.24-syyyyyyyy`), on GitLab Registry I'm using the Build ID of the CI Pipeline and the first 8 characters of the SHA1 commit ID (see above for details). So for each new build of the same release, you get a different Build ID even if there was no new commit (but the underlying base image could have changed).
+* You will find specific versions (as they build), e.g. `5.6.39` or `5.10.19` or etc.
+* And "branched versions" tag such as `5.6` and `5.10` which always point to the latest release within a branch (e.g. the most recent `5.10.x` release).
+* "Build" versions per release (e.g. `5.6.39-bxxxx` or `5.6.39-syyyyyyyy`), on GitLab Registry I'm using the Build ID of the CI Pipeline and the first 8 characters of the SHA1 commit ID (see above for details). So for each new build of the same release, you get a different Build ID even if there was no new commit (but the underlying base image could have changed).
 
 My recommendation is to either stick to a "rolling tag" (e.g. `lts` or `stable`)
 or to pick one of the build tag (for better repeatability, e.g. `5.5.20-b11594497`
@@ -25,17 +25,19 @@ backup file to revert if things get broken.
 
 ## Project Presentation
 
-This project has for purpose to run the UniFi Controller inside a Docker
-container with the following principles:
+This project has for purpose to run the UniFi Network Controller (also known as
+UniFi Controller or UniFi SDN Controller) inside a Docker container with the
+following principles:
 - Minimum privilege basis, we expose or need what's required
 - Update often, we want security fixes to be includes asap
 - Rolling update of the stable UniFi Controller releases
 
 We have currently the following features to progress towards those goals:
 - We drop all capabilities Docker usually grant to a container, no privilege container;
+- We forbid acquiring new privileges (e.g. via setuid programs);
 - We run the container as a non-root user;
 - We provide instructions so you do not need to use the host network;
-- We have weekly rebuild, so the full stack (from base image to UniFi Controller package);
+- We have weekly rebuild, so the full stack (from base image to UniFi Controller package) is kept up-to-date;
 - We provide a `stable` tag, which follow the stable branch of UniFi;
 - We usually have the UniFi Controller tested internally before it is published here;
 - And of course **it works**!
@@ -65,8 +67,12 @@ The following options may be of use:
 - Set the timezone with `TZ`
 - Use volumes to persist application data: the `data` and `log` volumes
 
-Here are a few examples to test with (or simply use the `docker-compose.yml` file
-in the repository).
+Below are a few examples to test with or simply use the `docker-compose.yml` file
+in the repository and do `docker-compose up -d` to start it. That file contains
+also a number of sane options which we recommend to use as well, such as:
+`restart`; `cpus`; `mem_limit`; `memswap_limit`; `pids_limit`; `cap_drop`; `security_opt`.
+It is recommended to change the values of those options to match your environment
+and requirements (e.g. increasing the number of cpus).
 
 > *Note: the following examples set permissions on the volumes so that the
 container can run with an **unprivileged user**. This is because the examples are
@@ -127,7 +133,11 @@ to perform such a backup (under Settings -> Maintenance and click the
 new container on a different host and try to restore the backup to make sure it
 works.
 
-Then simply stop and delete the previous container and respawn a new container
+It is highly recommended to check the UniFi changelog for the newer revisions to
+verify for known issues, changes, depreciation, etc. They can also contain
+additional instructions for upgrading.
+
+Usually simply stop and delete the previous container and respawn a new container
 with the updated Docker image. If you are using docker-compose, you can update
 the image tag and simply do `docker-compose up --pull -d` this will pull a newer
 image if any, and recreate the container using that image (so it will stop, remove,
