@@ -1,4 +1,4 @@
-version: '2.1'
+version: '2.2'
 
 services:
   unifi:
@@ -13,6 +13,7 @@ services:
     restart: always
     hostname: 'unifi'
     container_name: unifi
+    cpus: 1.0
     mem_limit: 1024m
     memswap_limit: 1536m
     cap_drop:
