@@ -10,14 +10,19 @@ services:
         BASEVERS: ${ARG_BASEVERS:-8-jre-slim}
         ARCH: ${ARG_ARCH:-amd64}
     image: "${CI_REGISTRY_IMAGE:-jcberthon/unifi}:${IMAGE_TAG:-latest}"
-    restart: always
+    restart: on-failure:5
     hostname: 'unifi'
     container_name: unifi
     cpus: 1.0
     mem_limit: 1024m
     memswap_limit: 1536m
+    # On my installation the whole containers uses about 105 processes/threads
+    # So I would not put less than 150 for the `pids_limit`.
+    pids_limit: 1000
     cap_drop:
       - ALL
+    security_opt:
+      - no-new-privileges
     ports:
       - '3478:3478/udp'
       - '6789:6789'
