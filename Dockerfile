@@ -4,7 +4,7 @@ FROM ${BASEIMG}:${BASEVERS}
 
 ARG ARCH=amd64
 ARG DEBIAN_FRONTEND=noninteractive
-ARG TINI_VERSION=v0.16.1
+ARG TINI_VERSION=v0.18.0
 
 # Install Ubiquiti UniFi Controller dependencies
 RUN apt-get update \
