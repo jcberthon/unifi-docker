@@ -18,7 +18,7 @@ build:amd64:
   variables:
     UNIFI_CHANNEL: stable
   before_script:
-    - apk add --no-cache curl gzip
+    - apk add --no-cache curl gzip bash
     - docker login -u "gitlab-ci-token" -p "$CI_JOB_TOKEN" $CI_REGISTRY
   script:
     - ./scripts/unifi-build.sh -c stable -e latest ${CI_REGISTRY_IMAGE}/unifi
