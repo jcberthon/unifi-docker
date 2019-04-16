@@ -12,7 +12,7 @@ function ci-get-unifi-version {
   ARG_ARCH="${2:-amd64}"
 
   curl -sSL "https://www.ubnt.com/downloads/unifi/debian/dists/${UNIFI_CHANNEL}/ubiquiti/binary-${ARG_ARCH:-amd64}/Packages.gz" \
-    | zgrep Version | sed -rn 's/Version: ([[:digit:]].[[:digit:]].[[:digit:]]+)-.*/\1/p'
+    | zgrep Version | sed -rn 's/Version: ([[:digit:]]+.[[:digit:]]+.[[:digit:]]+)-.*/\1/p'
 }
 
 # For unofficial documentation, see: https://docs.docker.com/docker-cloud/builds/advanced/
