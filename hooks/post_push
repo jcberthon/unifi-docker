@@ -29,8 +29,8 @@ function ci-get-unifi-version {
 SHA_COMMIT="$(echo ${GIT_SHA1} | cut -b-8)"
 
 if [[ "${SOURCE_BRANCH}" == "master" ]]; then
-  ./scripts/unifi-publi.sh -c oldstable "${CI_REGISTRY_IMAGE}/unifi"
-  ./scripts/unifi-publi.sh -c unifi-5.6 -t lts "${CI_REGISTRY_IMAGE}/unifi"
+  ./scripts/unifi-publi.sh -c oldstable "${DOCKER_REPO}"
+  ./scripts/unifi-publi.sh -c unifi-5.6 -t lts "${DOCKER_REPO}"
   # CHANNEL_NAME="stable"
   # CHANNEL_VERSION="$(ci-get-unifi-version ${CHANNEL_NAME} amd64)"
   # CHANNEL_SHORT_VERSION="$(echo ${CHANNEL_VERSION} | cut -d. -f-2)"

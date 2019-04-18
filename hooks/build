@@ -2,4 +2,4 @@
 
 set -euxo pipefail
 
-./scripts/unifi-build.sh -c stable -e latest "${CI_REGISTRY_IMAGE}/unifi"
+./scripts/unifi-build.sh -c stable -e latest "${DOCKER_REPO}"
