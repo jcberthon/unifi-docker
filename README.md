@@ -2,23 +2,21 @@
 
 
 ## Supported tags and respective `Dockerfile` links
-On **Docker Hub**:
-* [`latest`, `stable` (Dockerfile)](https://github.com/jcberthon/unifi-docker/blob/master/Dockerfile): currently unifi-5.10 branch
-* [`lts`, `oldstable` (Dockerfile)](https://github.com/jcberthon/unifi-docker/blob/oldstable/Dockerfile): currently unifi-5.6 branch
-* You will find specific versions (as they build), e.g. `5.6.39` or `5.10.19` or etc.
-* And "branched versions" tag such as `5.6` and `5.10` which always point to the latest release within a branch (e.g. the most recent `5.10.x` release).
-* "Build" versions per release (e.g. `5.6.39-syyyyyyyy`), on GitHub/DockerHub I'm using the first 8 characters of the SHA1 commit ID. The purpose is when I'm changing my image definition but UniFi Controller release has not changed, I need to distinguish between the previous and newer image although both are `5.6.39` variants. So when a user picks one the "built" image he is sure to get the same image definition.
 
-On **GitLab Container Registry**:
-* [`latest`, `stable` (Dockerfile)](https://gitlab.com/huygens/unifi-docker/blob/master/Dockerfile): currently unifi-5.10 branch
-* [`lts`, `oldstable` (Dockerfile)](https://gitlab.com/huygens/unifi-docker/blob/oldstable/Dockerfile): currently unifi-5.6 branch
-* You will find specific versions (as they build), e.g. `5.6.39` or `5.10.19` or etc.
-* And "branched versions" tag such as `5.6` and `5.10` which always point to the latest release within a branch (e.g. the most recent `5.10.x` release).
-* "Build" versions per release (e.g. `5.6.39-bxxxx` or `5.6.39-syyyyyyyy`), on GitLab Registry I'm using the Build ID of the CI Pipeline and the first 8 characters of the SHA1 commit ID (see above for details). So for each new build of the same release, you get a different Build ID even if there was no new commit (but the underlying base image could have changed).
+*Note: I do not update the README file regularly. So please check the tag lists
+if newer releases have been pushed.*
+
+* [`5.10.21`, `5.10`, `latest`, `stable` (Dockerfile)](https://github.com/jcberthon/unifi-docker/blob/master/Dockerfile): currently unifi-5.10 branch
+* [`5.9.29`, `5.9`, `oldstable` (Dockerfile)](https://github.com/jcberthon/unifi-docker/blob/master/Dockerfile): currently unifi-5.9 branch
+* [`5.6.40`, `5.6`, `lts` (Dockerfile)](https://github.com/jcberthon/unifi-docker/blob/master/Dockerfile): currently unifi-5.6 branch
+
+You will find specific versions (as they build), e.g. `5.6.39` or `5.10.19` or etc.  
+And "branch versions" tag such as `5.6` and `5.10` which always point to the latest release within a branch (e.g. the most recent `5.10.x` release).
+
+"Build" versions per release (e.g. `5.6.39-syyyyyyyy`), I'm using the first 8 characters of the SHA1 commit ID. The purpose is when I'm changing my image definition but UniFi Controller release has not changed, I need to distinguish between the previous and newer image although both are `5.6.39` variants. So when a user picks one of the "build" image he is sure to get the same image definition.
 
 My recommendation is to either stick to a "rolling tag" (e.g. `lts` or `stable`)
-or to pick one of the build tag (for better repeatability, e.g. `5.5.20-b11594497`
-or `5.5.20-s4255dc00`).  
+or to pick one of the build tag (for better repeatability, e.g. `5.5.20-s11594497`).  
 In any case it is recommended to activate scheduled backup in your UniFi Controller
 so that if you automatically upgrade when using a rolling tag, you always have a
 backup file to revert if things get broken.
