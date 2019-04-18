@@ -21,12 +21,12 @@ build:amd64:
     - apk add --no-cache curl gzip bash
     - docker login -u "gitlab-ci-token" -p "$CI_JOB_TOKEN" "$CI_REGISTRY"
   script:
-    - ./scripts/unifi-build.sh -c stable -e latest "${CI_REGISTRY_IMAGE}/unifi"
-    - ./scripts/unifi-publi.sh -c stable -e latest "${CI_REGISTRY_IMAGE}/unifi"
-    - ./scripts/unifi-build.sh -c oldstable "${CI_REGISTRY_IMAGE}/unifi"
-    - ./scripts/unifi-publi.sh -c oldstable "${CI_REGISTRY_IMAGE}/unifi"
-    - ./scripts/unifi-build.sh -c unifi-5.6 -t lts "${CI_REGISTRY_IMAGE}/unifi"
-    - ./scripts/unifi-publi.sh -c unifi-5.6 -t lts "${CI_REGISTRY_IMAGE}/unifi"
+    - ./scripts/unifi-build.sh -c stable -e latest -g "${CI_COMMIT_SHORT_SHA}" "${CI_REGISTRY_IMAGE}/unifi"
+    - ./scripts/unifi-publi.sh -c stable -e latest -g "${CI_COMMIT_SHORT_SHA}" "${CI_REGISTRY_IMAGE}/unifi"
+    - ./scripts/unifi-build.sh -c oldstable -g "${CI_COMMIT_SHORT_SHA}" "${CI_REGISTRY_IMAGE}/unifi"
+    - ./scripts/unifi-publi.sh -c oldstable -g "${CI_COMMIT_SHORT_SHA}" "${CI_REGISTRY_IMAGE}/unifi"
+    - ./scripts/unifi-build.sh -c unifi-5.6 -t lts -g "${CI_COMMIT_SHORT_SHA}" "${CI_REGISTRY_IMAGE}/unifi"
+    - ./scripts/unifi-publi.sh -c unifi-5.6 -t lts -g "${CI_COMMIT_SHORT_SHA}" "${CI_REGISTRY_IMAGE}/unifi"
   tags:
     - docker
 
