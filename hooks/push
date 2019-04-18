@@ -2,4 +2,6 @@
 
 set -euxo pipefail
 
-./scripts/unifi-publi.sh -c stable -e latest "${DOCKER_REPO}"
+SHA_COMMIT="$(echo "${GIT_SHA1}" | cut -b-8)"
+
+./scripts/unifi-publi.sh -c stable -e latest -g "${SHA_COMMIT}" "${DOCKER_REPO}"
