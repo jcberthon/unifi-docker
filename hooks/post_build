@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+set -euxo pipefail
+
+# Build old stable
+./scripts/unifi-build.sh -c oldstable "${CI_REGISTRY_IMAGE}/unifi"
+
+# Build LTS
+./scripts/unifi-build.sh -c unifi-5.6 -t lts "${CI_REGISTRY_IMAGE}/unifi"
