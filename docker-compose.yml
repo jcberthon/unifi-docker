@@ -9,6 +9,7 @@ services:
         BASEIMG: ${ARG_BASEIMG:-openjdk}
         BASEVERS: ${ARG_BASEVERS:-8-jre-slim}
         ARCH: ${ARG_ARCH:-amd64}
+        UNIFI_CHANNEL: ${ARG_CHANNEL:-stable}
     image: "${CI_REGISTRY_IMAGE:-jcberthon/unifi}:${IMAGE_TAG:-latest}"
     restart: on-failure:5
     hostname: 'unifi'
