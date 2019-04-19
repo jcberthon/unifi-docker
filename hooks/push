@@ -2,6 +2,24 @@
 
 set -euxo pipefail
 
+# For official documentation, see: https://docs.docker.com/docker-cloud/builds/advanced/
+# Available variables:
+# - `SOURCE_BRANCH`: the name of the branch or the tag that is currently being tested.
+# - `SOURCE_COMMIT`: the SHA1 hash of the commit being tested.
+# - `COMMIT_MSG`: the message from the commit being tested and built.
+# - `DOCKER_REPO`: the name of the Docker repository being built.
+# - `CACHE_TAG`: the Docker repository tag being built. --> seems empty, renamed? it is still DOCKER_TAG, eventhough https://github.com/docker/docker.github.io/issues/2125
+# - `IMAGE_NAME`: the name and tag of the Docker repository being built. (This variable is a combination of `DOCKER_REPO`:`CACHE_TAG`.)
+#
+# SHA_COMMIT=${SOURCE_COMMIT:0:8}
+
 SHA_COMMIT="$(echo "${GIT_SHA1}" | cut -b-8)"
 
+# Push old stable
+./scripts/unifi-publi.sh -c oldstable -g "${SHA_COMMIT}" "${DOCKER_REPO}"
+
+# Push LTS
+./scripts/unifi-publi.sh -c unifi-5.6 -t lts -g "${SHA_COMMIT}" "${DOCKER_REPO}"
+
+# Push stable
 ./scripts/unifi-publi.sh -c stable -e latest -g "${SHA_COMMIT}" "${DOCKER_REPO}"

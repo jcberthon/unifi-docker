@@ -43,8 +43,11 @@ fi
 
 (( ! opt_tag )) && tag=${channel}
 
-# Push default tag
-docker push "${repo_name}:${tag}"
+# Push full version + short commit ID (e.g. 5.10.21-s12345678) if possible
+if (( opt_commit )); then
+  short_commit="$(echo ${commit} | cut -b-8)"
+  docker push "${repo_name}:${VERSION_UNIFI}-s${short_commit}"
+fi
 
 # Push full version (e.g. 5.10.21)
 VERSION_UNIFI="$(./scripts/ci-get-unifi-version.sh ${channel})"
@@ -54,11 +57,8 @@ docker push "${repo_name}:${VERSION_UNIFI}"
 VERSION_UNIFI_BRANCH="$(echo ${VERSION_UNIFI} | cut -d. -f-2)"
 docker push "${repo_name}:${VERSION_UNIFI_BRANCH}"
 
-# Push full version + short commit ID if possible
-if (( opt_commit )); then
-  short_commit="$(echo ${commit} | cut -b-8)"
-  docker push "${repo_name}:${VERSION_UNIFI}-s${short_commit}"
-fi
+# Push default tag
+docker push "${repo_name}:${tag}"
 
 # Push extra tag
 if (( opt_extratag )); then

@@ -4,4 +4,11 @@ set -euxo pipefail
 
 SHA_COMMIT="$(echo "${GIT_SHA1}" | cut -b-8)"
 
+# Build stable
 ./scripts/unifi-build.sh -c stable -e latest -g "${SHA_COMMIT}" "${DOCKER_REPO}"
+
+# Build old stable
+./scripts/unifi-build.sh -c oldstable -g "${SHA_COMMIT}" "${DOCKER_REPO}"
+
+# Build LTS
+./scripts/unifi-build.sh -c unifi-5.6 -t lts -g "${SHA_COMMIT}" "${DOCKER_REPO}"
