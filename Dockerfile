@@ -1,36 +1,50 @@
-ARG BASEIMG=openjdk
-ARG BASEVERS=8-jre-slim
+ARG BASEIMG=ubuntu
+ARG BASEVERS=bionic
 FROM ${BASEIMG}:${BASEVERS}
 
 ARG ARCH=amd64
+ENV ARCH=${ARCH}
 ARG DEBIAN_FRONTEND=noninteractive
-ARG TINI_VERSION=v0.18.0
+ENV TINI_VERSION=v0.18.0
+ARG MONGODB_VERSION=3.4
+ENV MONGODB_VERSION=${MONGODB_VERSION}
+
 
 # Install Ubiquiti UniFi Controller dependencies
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
         apt-transport-https \
+        ca-certificates \
         binutils \
         curl \
         dirmngr \
         gnupg \
         jsvc \
-        mongodb-server \
         procps \
+    && curl -OL "https://www.mongodb.org/static/pgp/server-${MONGODB_VERSION}.asc" \
+    && apt-key add server-${MONGODB_VERSION}.asc \
+    && echo "deb https://repo.mongodb.org/apt/ubuntu xenial/mongodb-org/${MONGODB_VERSION} multiverse" > /etc/apt/sources.list.d/mongodb-org.list \
+    && rm -f server-${MONGODB_VERSION}.asc \
+    && apt-get update \
+    && apt-get install -y --no-install-recommends \
+        mongodb-org-server \
     && apt-get clean -qy \
     && rm -rf /var/lib/apt/lists/* \
-    && curl -L https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini-${ARCH} -o /sbin/tini \
-    && curl -L https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini-${ARCH}.asc -o /sbin/tini.asc \
+    && curl -L "https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini-${ARCH}" -o /sbin/tini \
+    && curl -L "https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini-${ARCH}.asc" -o /sbin/tini.asc \
     && gpg --batch --keyserver hkp://keyserver.ubuntu.com --recv-keys 595E85A6B1B4779EA4DAAEC70B588DFF0527A9B7 \
     && gpg --batch --verify /sbin/tini.asc /sbin/tini \
     && rm -f /sbin/tini.asc \
     && chmod 0755 /sbin/tini \
-    && apt-key adv --keyserver hkp://keyserver.ubuntu.com --recv 4A228B2D358A5094178285BE06E85760C0A52C50
+    && curl -OL "https://dl.ui.com/unifi/unifi-repo.gpg" \
+    && apt-key add unifi-repo.gpg \
+    && rm -f unifi-repo.gpg
 
 
 
 # Install Ubiquiti UniFi Controller
 ARG UNIFI_CHANNEL=stable
+ENV UNIFI_CHANNEL=${UNIFI_CHANNEL}
 RUN groupadd -g 750 -o unifi \
     && useradd -u 750 -o -g unifi -M unifi \
     && echo "deb https://www.ubnt.com/downloads/unifi/debian ${UNIFI_CHANNEL} ubiquiti" > /etc/apt/sources.list.d/ubiquiti-unifi.list \
