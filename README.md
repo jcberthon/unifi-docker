@@ -233,8 +233,8 @@ $ docker run --rm --cap-drop ALL \
 
 ## Container Content
 
-This container is based on the Docker Hub official image for OpenJDK 8 (
-`FROM openjdk:8-jre-slim`) which is currently based on Debian 9 Stretch. Ubiquiti
+This container is based on the Docker Hub official image for Ubuntu 18.04 (
+`FROM ubuntu:bionic`) which is currently using OpenJDK 8. Ubiquiti
 recommends using either Debian or Ubuntu, so that image looks good. The official
 Mongo image is based on Debian 7 Wheezy which means using outdated packages and
 based on OpenJDK 7 by default. Not an option.  
