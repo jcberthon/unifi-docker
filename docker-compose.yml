@@ -6,8 +6,8 @@ services:
       context: .
       dockerfile: Dockerfile
       args:
-        BASEIMG: ${ARG_BASEIMG:-openjdk}
-        BASEVERS: ${ARG_BASEVERS:-8-jre-slim}
+        BASEIMG: ${ARG_BASEIMG:-ubuntu}
+        BASEVERS: ${ARG_BASEVERS:-focal}
         ARCH: ${ARG_ARCH:-amd64}
         UNIFI_CHANNEL: ${ARG_CHANNEL:-stable}
     image: "${CI_REGISTRY_IMAGE:-jcberthon/unifi}:${IMAGE_TAG:-latest}"
@@ -16,7 +16,7 @@ services:
     container_name: unifi
     cpus: 1.0
     mem_limit: 1024m
-    memswap_limit: 1536m
+    memswap_limit: 2048m
     # On my installation the whole containers uses about 105 processes/threads
     # So I would not put less than 150 for the `pids_limit`.
     pids_limit: 1000

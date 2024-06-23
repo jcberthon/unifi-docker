@@ -42,7 +42,7 @@
 # to 512MB, for Small Business the default is good, for large installations
 # you should try 2048MB.
 # Default value: JVM_MAX_HEAP_SIZE=1024M
-JVM_MAX_HEAP_SIZE=
+# JVM_MAX_HEAP_SIZE=
 
 # JVM_INIT_HEAP_SIZE
 # Control the initial heap size. Usually you do not need to change that
@@ -55,10 +55,14 @@ JVM_MAX_HEAP_SIZE=
 # Here you can specify any other JVM options you wish (related to GC, etc.)
 # See your vendor JVM for possibilities.
 # Default value: UNIFI_JVM_EXTRA_OPTS=
-UNIFI_JVM_EXTRA_OPTS="-XX:MaxRAMFraction=2 -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap"
+UNIFI_JVM_EXTRA_OPTS="-XX:MaxRAMPercentage=50.0"
 
 # ENABLE_UNIFI
 # With this option you can for disable the Unifi Controller.
 # Values are 'yes' or 'no'.
 # Default value: ENABLE_UNIFI=yes
 # ENABLE_UNIFI=yes
+
+# New parameters
+UNIFI_CORE_ENABLED=false
+UNIFI_MONGODB_SERVICE_ENABLED=false

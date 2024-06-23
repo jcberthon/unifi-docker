@@ -18,16 +18,20 @@ JVM_INIT_HEAP_SIZE=
 UNIFI_JVM_EXTRA_OPTS=
 
 ENABLE_UNIFI=yes
-JVM_EXTRA_OPTS=
+JVM_EXTRA_OPTS="-XX:+ExitOnOutOfMemoryError -XX:+CrashOnOutOfMemoryError"
 [ -f "/etc/default/${NAME}" ] && . "/etc/default/${NAME}"
 
 [ "x${ENABLE_UNIFI}" != "xyes" ] && exit 0
+
+# Unifi Init and Init-UOS
+/usr/lib/unifi/bin/unifi-network-service-helper init
+/usr/lib/unifi/bin/unifi-network-service-helper init-uos
 
 DATADIR=${UNIFI_DATA_DIR:-/var/lib/${NAME}}
 LOGDIR=${UNIFI_LOG_DIR:-/var/log/${NAME}}
 RUNDIR=${UNIFI_RUN_DIR:-/var/run/${NAME}}
 
-JVM_EXTRA_OPTS="${JVM_EXTRA_OPTS} -Dunifi.datadir=${DATADIR} -Dunifi.logdir=${LOGDIR} -Dunifi.rundir=${RUNDIR}"
+JVM_EXTRA_OPTS="${JVM_EXTRA_OPTS} -Dunifi.datadir=${DATADIR} -Dunifi.logdir=${LOGDIR} -Dunifi.rundir=${RUNDIR} -XX:ErrorFile=${LOGDIR}/unifi_crash.log -Xlog:gc:logs/gc.log:time:filecount=2,filesize=5M"
 
 if [ ! -z "${JAVA_ENTROPY_GATHER_DEVICE}" ]; then
   JVM_EXTRA_OPTS="${JVM_EXTRA_OPTS} -Djava.security.egd=${JAVA_ENTROPY_GATHER_DEVICE}"
@@ -45,7 +49,7 @@ if [ ! -z "${UNIFI_JVM_EXTRA_OPTS}" ]; then
   JVM_EXTRA_OPTS="${JVM_EXTRA_OPTS} ${UNIFI_JVM_EXTRA_OPTS}"
 fi
 
-JVM_OPTS="${JVM_EXTRA_OPTS} -Djava.awt.headless=true -Dfile.encoding=UTF-8"
+JVM_OPTS="${JVM_EXTRA_OPTS} -Djava.awt.headless=true -Dfile.encoding=UTF-8 -Djava.awt.headless=true"
 
 UNIFI_USER=${UNIFI_USER:-unifi}
 
@@ -53,7 +57,7 @@ MONGOLOCK="${DATADIR}/db/mongod.lock"
 
 UNIFI_UID=$(id -u "${UNIFI_USER}")
 DATADIR_UID=$(stat "${DATADIR}" -Lc %u)
-if [ ${UNIFI_UID} -ne ${DATADIR_UID} ]; then
+if (( UNIFI_UID != DATADIR_UID )); then
   msg="${NAME} cannot start. Please create ${UNIFI_USER} user, and chown -R ${UNIFI_USER} ${DATADIR} ${LOGDIR} ${RUNDIR}"
   echo "$msg" >&2
   exit 1
@@ -62,6 +66,15 @@ fi
 cd ${BASEDIR}
 
 echo "Starting ${NAME}"
-/usr/bin/java ${JVM_OPTS} -jar "${BASEDIR}/lib/ace.jar" start
+/usr/bin/java ${JVM_OPTS} \
+  --add-opens java.base/java.lang=ALL-UNNAMED \
+  --add-opens java.base/java.time=ALL-UNNAMED \
+  --add-opens java.base/sun.security.util=ALL-UNNAMED \
+  --add-opens java.base/java.io=ALL-UNNAMED \
+  --add-opens java.rmi/sun.rmi.transport=ALL-UNNAMED \
+  -jar "${BASEDIR}/lib/ace.jar" start
+
+# After exiting
+/usr/lib/unifi/bin/unifi-network-service-helper cleanup
 
 exit 0

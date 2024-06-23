@@ -6,7 +6,7 @@
 *Note: I do not update the README file regularly. So please check the tag lists
 if newer releases have been pushed.*
 
-* [`5.10.21`, `5.10`, `latest`, `stable` (Dockerfile)](https://github.com/jcberthon/unifi-docker/blob/master/Dockerfile): currently unifi-5.10 branch
+* [`8.2`, `latest`, `stable` (Dockerfile)](https://github.com/jcberthon/unifi-docker/blob/master/Dockerfile): currently unifi-8.2 branch
 * [`5.9.29`, `5.9`, `oldstable` (Dockerfile)](https://github.com/jcberthon/unifi-docker/blob/master/Dockerfile): currently unifi-5.9 branch
 * [`5.6.40`, `5.6`, `lts` (Dockerfile)](https://github.com/jcberthon/unifi-docker/blob/master/Dockerfile): currently unifi-5.6 branch
 

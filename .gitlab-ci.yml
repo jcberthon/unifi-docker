@@ -5,8 +5,8 @@ image: docker:stable
 variables:
   DOCKER_DRIVER: overlay
   ARG_ARCH: "amd64"
-  ARG_BASEIMG: "openjdk"
-  ARG_BASEVERS: "8-jre-slim"
+  ARG_BASEIMG: "ubuntu"
+  ARG_BASEVERS: "focal"
 
 services:
 - docker:stable-dind
@@ -25,8 +25,8 @@ build:amd64:
     - ./scripts/unifi-publi.sh -c stable -e latest -g "${CI_COMMIT_SHORT_SHA}" "${CI_REGISTRY_IMAGE}/unifi"
     - ./scripts/unifi-build.sh -c oldstable -g "${CI_COMMIT_SHORT_SHA}" "${CI_REGISTRY_IMAGE}/unifi"
     - ./scripts/unifi-publi.sh -c oldstable -g "${CI_COMMIT_SHORT_SHA}" "${CI_REGISTRY_IMAGE}/unifi"
-    - ./scripts/unifi-build.sh -c unifi-5.6 -t lts -g "${CI_COMMIT_SHORT_SHA}" "${CI_REGISTRY_IMAGE}/unifi"
-    - ./scripts/unifi-publi.sh -c unifi-5.6 -t lts -g "${CI_COMMIT_SHORT_SHA}" "${CI_REGISTRY_IMAGE}/unifi"
+    - ./scripts/unifi-build.sh -c unifi-8.2 -t lts -g "${CI_COMMIT_SHORT_SHA}" "${CI_REGISTRY_IMAGE}/unifi"
+    - ./scripts/unifi-publi.sh -c unifi-8.2 -t lts -g "${CI_COMMIT_SHORT_SHA}" "${CI_REGISTRY_IMAGE}/unifi"
   tags:
     - docker
 
