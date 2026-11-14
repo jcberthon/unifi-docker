@@ -1,5 +1,8 @@
 # UniFi Network Controller in a Box - Docker Edition
 
+> [!CAUTION]
+> I do not maintain this project any longer. The Dockerfile is outdated.  
+> This repository is archived.
 
 ## Supported tags and respective `Dockerfile` links
 
